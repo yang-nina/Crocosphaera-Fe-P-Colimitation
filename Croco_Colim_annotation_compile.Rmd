@@ -43,7 +43,7 @@ This script will take the results from the DIAMOND blastx run, subsequent BLAST2
 Blastx using DIAMOND took place on September 5, 2021 using the NCBI nr database downloaded August 31, 2021. 
 
 ```{r blastx, eval = TRUE, message = FALSE, warning = FALSE}
-blast <- read_tsv("/Users/ninayang/Documents/Blast2GO/b2gfiles/Croco_annot_diamond.tsv", col_names = FALSE) # this is the output from DIAMOND blastx
+blast <- read_tsv("Croco_annot_diamond.tsv", col_names = FALSE) # this is the output from DIAMOND blastx
 head(blast)
 colnames(blast) <- c("seqName", "tophit", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore",  "qlen", "slen") # rename columns
 summary(blast)
@@ -59,7 +59,7 @@ Uniprot mapping took place on September 5, 2021.
 834 EMBL / GENBANK / DDBJ / CDS / IDs were mapped to 834 UniProtKB IDs
 
 ```{r uniprot_blast, eval = TRUE, message = FALSE, warning = FALSE}
-uniprot_1 <- read_tsv("/Users/ninayang/Documents/Blast2GO/b2gfiles/Croco_uniprot_blast.tsv", col_names = TRUE)
+uniprot_1 <- read_tsv("Croco_uniprot_blast.tsv", col_names = TRUE)
 uniprot_1 <- uniprot_1[,c(1,3:10)] # select relevant columns
 colnames(uniprot_1) <- c("tophit", "uniprotkb_entry", "status", "protein_names", "gene_names", "organism", "length", "gene_ontology", "go_ids")
 head(uniprot_1)
@@ -70,7 +70,7 @@ dim(uniprot_1)
 629 Refseq Protein IDs were Mapped to 934 UniProtKB IDs
 
 ```{r uniprot_refseq, eval = TRUE, message = FALSE, warning = FALSE}
-uniprot_2 <- read_tsv("/Users/ninayang/Documents/Blast2GO/b2gfiles/Croco_uniprot_refseq.tsv", col_names = TRUE)
+uniprot_2 <- read_tsv("Croco_uniprot_refseq.tsv", col_names = TRUE)
 uniprot_2 <- uniprot_2[,c(1,3:10)]
 colnames(uniprot_2) <- c("tophit", "uniprotkb_entry", "status", "protein_names", "gene_names", "organism", "length", "gene_ontology", "go_ids")
 head(uniprot_2)
@@ -100,7 +100,7 @@ nrow(filter(Uniprot_results, grepl("GO:",go_ids))) #Genes with GO terms #1191
 Of 5,924 coding regions, 5,065 returned accessions via DIAMOND blastx. BLAST2GO GO mapping and IPS annotation identified 2,866 accessions with GO annotation.
 
 ```{r blast2go_merge, eval = TRUE, message = FALSE, warning = FALSE}
-B2G_results <- read_tsv("/Users/ninayang/Documents/Blast2GO/b2gFiles/blast2go_table.txt", col_names = TRUE)
+B2G_results <- read_tsv("blast2go_table.txt", col_names = TRUE)
 head(B2G_results)
 B2G_results <- B2G_results[,c(3:5, 7:8,10:11, 15:16)] # select the relevant columns
 head(B2G_results)
@@ -243,7 +243,7 @@ head(df)
 
 dim(df) # 3050 x 8
 
-kegg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_kegg_annot.csv", col_names = TRUE) # read in KEGG annotation (this is based on KOfamScan annotation from Qu et al., 2022)
+kegg <- read_csv("Croco_kegg_annot.csv", col_names = TRUE) # read in KEGG annotation (this is based on KOfamScan annotation from Qu et al., 2022)
 head(kegg)
 dim(kegg)
 
@@ -257,7 +257,7 @@ KO_annot <- left_join(df, kegg, by="id")
 head(KO_annot)
 dim(KO_annot) # only the genes that have GO annotation
 
-write.csv(KO_annot, "/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_annot_compiled_final_new.csv", row.names = TRUE)
+write.csv(KO_annot, "Croco_annot_compiled_final_new.csv", row.names = TRUE)
 
 ```
 
@@ -269,7 +269,7 @@ This takes the score with a list of GO IDs separated by ";" and creates an indiv
 
 # This is used for the "universe" for enrichment analysis. Split the collated GO IDs into individual rows associated by gene_id. The gene_id list will include merged KOs (combine replicate KOs to generate "unique"" KOs) and numeric (assigned) gene_ids.
 
-df <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_annot_compiled_final_new.csv", col_names = TRUE) # load the annotation file
+df <- read_csv("Croco_annot_compiled_final_new.csv", col_names = TRUE) # load the annotation file
 head(df)
 tail(df)
 colnames(df)
@@ -365,10 +365,10 @@ goterms <- Term(GOTERM) # extract terms
 ontology <- Ontology(GOTERM)
 df <- as.data.frame(goterms, col_names = TRUE) # create a dataframe of goterms
 df_ont <- as.data.frame(ontology, col_names = TRUE)
-write.csv(df, file="/Users/ninayang/Documents/Blast2GO/b2gFiles/goterms.csv", row.names = TRUE) # write as a csv
-write.csv(df_ont, file="/Users/ninayang/Documents/Blast2GO/b2gFiles/ontology.csv", row.names = TRUE) # write as a csv
-go <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/goterms.csv", col_names = TRUE) # read the csv back into R to manipulate (I realize this could be a roundabout way to get the formatting correct but it worked!)
-ont <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/ontology.csv", col_names = TRUE)
+write.csv(df, file="goterms.csv", row.names = TRUE) # write as a csv
+write.csv(df_ont, file="ontology.csv", row.names = TRUE) # write as a csv
+go <- read_csv("goterms.csv", col_names = TRUE) # read the csv back into R to manipulate (I realize this could be a roundabout way to get the formatting correct but it worked!)
+ont <- read_csv("ontology.csv", col_names = TRUE)
 colnames(go) <- c("GO.ID", "GO.Term") # rename col names
 head(go)
 dim(go)
@@ -385,6 +385,6 @@ head(universe)
 tail(universe)
 dim(universe) # should be 6116
 
-write.csv(universe, file="/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", row.names = TRUE) # will serve as universe for enricher analysis
+write.csv(universe, file="Croco_GO_KO_database.csv", row.names = TRUE) # will serve as universe for enricher analysis
 
 ```
