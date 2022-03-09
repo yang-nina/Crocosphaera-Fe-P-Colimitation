@@ -4,7 +4,7 @@ This respository includes the data and code to recreate analyses and figures fro
 
 ## Files
 
-1. Croco_Colim_annotation_compile.Rmd --> Annotated R Markdown file to re-annotate the low-contig _Crocosphaera_ genome for Gene Ontology and KEGG annotation
+1. Croco_Colim_annotation_compile.Rmd --> Annotated R Markdown file to re-annotate the low-contig _Crocosphaera_ genome for Gene Ontology and KEGG annotation. Note that to use the script, the file pathways will have to be updated. 
       -  Input file: Croco_annot_diamond.tsv
       -  Input file: Croco_uniprot_blast.tsv
       -  Input file: Croco_uniprot_refseq.tsv
