@@ -1,0 +1,267 @@
+---
+title: "Croco_Colim_DESeq2"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "9/28/2021"
+updated: "3/10/2022"
+output: html_document
+---
+
+## Background
+
+This document outlines the steps taken to analyze the RNASeq data using DESeq2 
+
+## Load libraries
+
+**1. Install (if required) & upload packages into your current session**
+
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+if(!require(dplyr)){install.packages("dplyr")} 
+if(!require(tidyverse)){install.packages("tidyverse")} 
+if(!require(ggpubr)){install.packages("plyr")}
+if(!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("DESeq2")
+```
+
+**2. Upload the package into your current session**
+```{r library, eval = TRUE, message = FALSE, warning = FALSE}
+library(DESeq2)
+library(tidyverse) 
+library(dplyr) 
+library(plyr)
+```
+
+## RNASeq Analysis with DESeq2
+
+Remove duplicate KOs
+
+```{r ddply, eval = TRUE, message = FALSE, warning = FALSE}
+# Gene counts were assigned to Kegg IDs and the duplicate KOs in the dataset will be merged.
+
+df <- read.csv("keggassign_counts_fordeduping_stranded.csv") 
+summary(df) # there are 5,924 entries
+head(df)
+dim(df)
+ddDF <- ddply(df,"gene_id",numcolwise(sum))
+dim(ddDF)
+write.csv(ddDF,"CrocoColim_counts_deduped_forDESeq2.csv", row.names = FALSE)
+```
+
+Normalize data for subsequent analysis. After removing duplicates, the counts file will be trimmed to remove rows where the average of each treatment for a given gene is less than 5 (we keep genes where the average of at least one treatment is greater than 5). 
+
+```{r trim, eval = TRUE, message = FALSE, warning = FALSE}
+# trimmed counts is the data where genes with low counts have been removed
+trim_df <- read_csv("CrocoColim_counts_deduped_forDESeq2.csv")
+head(trim_df)
+colnames(trim_df)
+
+# calculate rowmeans
+mean.CoD <- as.numeric(rowMeans(trim_df[, 2:4]))
+mean.CoN <- as.numeric(rowMeans(trim_df[, 5:7]))
+mean.FeD <- as.numeric(rowMeans(trim_df[, 8:10]))
+mean.FeN <- as.numeric(rowMeans(trim_df[, 11:13]))
+mean.PD <- as.numeric(rowMeans(trim_df[, 14:16]))
+mean.PN <- as.numeric(rowMeans(trim_df[, 17:19]))
+mean.ReD <- as.numeric(rowMeans(trim_df[, 20:22]))
+mean.ReN <- as.numeric(rowMeans(trim_df[, 23:25]))
+
+# create a dataframe only with rowmeans based on treatment
+trim_df1 <- as.data.frame(cbind(mean.CoD, mean.CoN, mean.FeD, mean.FeN, mean.PD, mean.PN, mean.ReD, mean.ReN))
+colnames(trim_df1)
+summary(trim_df1)
+trim_df2 <- cbind(trim_df$gene_id, trim_df1)
+summary(trim_df2)
+names(trim_df2)[1] <- "gene_id"
+head(trim_df2)
+summary(trim_df2)
+
+# filter this rowMeans dataframe so that all rows where even one column is less than 5 is removed
+trim_rows <- trim_df2 %>% dplyr::select(gene_id, starts_with("mean")) %>% filter_if(is.numeric, any_vars(. >= 5)) # should have 3770. Checked against a manual effort.
+
+summary(trim_rows)
+
+trimmed <- left_join(trim_rows, trim_df, by="gene_id")
+head(trimmed)
+
+final_trim <- trimmed %>% dplyr::select(gene_id, !(starts_with("mean")))
+head(final_trim)
+summary(final_trim)
+
+write.csv(final_trim, file = "CrocoColim_trimmed_forDESeq2.csv", row.names = TRUE)
+
+```
+
+Setting up the matrix for DESeq2 and generating normalized datasets.
+
+```{r normalize, eval = TRUE, message = FALSE, warning = FALSE}
+cts <- read_csv("CrocoColim_trimmed_forDESeq2.csv")
+colnames(cts);
+cts <- cts[, 3:26]
+colnames(cts);
+colnames(cts)
+
+# column data is the metadata for the dataset
+## the data has Sample, Treatment, Diel, and Design (combination of Treatment and Diel)
+col <- read.csv("colim_coldata_DESeq2.csv", header = TRUE)
+
+# set up DESeq2 matrix for Design
+dds <- DESeqDataSetFromMatrix(countData = cts, colData = col, design = ~ Design)
+
+# get normalized counts: not for DESeq but important for downstream visualization (DESeq2 input is non-normalized counts data because it undergoes normalization as a part of the pipeline). We will be using normalized counts for visualizations of biomarker genes.
+# https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html
+# note that DESeq2 recommend vst transformed!!
+ddsNorm <- estimateSizeFactors(dds)
+sizeFactors(ddsNorm)
+normalized_counts <- counts(ddsNorm, normalized=TRUE)
+write.csv(as.data.frame(normalized_counts), file="CrocoColim_normcounts_forDGE.csv")
+
+# plot a PCA to check the data 
+vstcounts <- vst(dds, blind=FALSE)
+write.csv((assay(vstcounts)), file="CrocoColim_vstcounts_forDGE.csv")
+head(assay(vstcounts), 3)
+plotPCA(vstcounts, intgroup=c("Treatment", "Diel"))
+rld <- rlog(dds, blind=FALSE)
+plotPCA(rld, intgroup=c("Treatment", "Design"))
+write.csv((assay(rld)), file="CrocoColim_rldcounts_forDGE.csv")
+
+# don't use normalized counts (norm counts are used for comparison and other calculations)
+
+ddsObj <- DESeq(dds)
+res <- results(ddsObj, alpha = 0.05) # filtering set to alpha 0.05
+sum(res$padj < 0.05, na.rm=TRUE) # this pulls the number of genes with padj less than 0.05 (total) 
+# 2,143
+
+# Day v Night
+## Day v Night Day means that positive is upregulated for Day relative to Night
+
+#Replete
+RepDN <- results(ddsObj, alpha = 0.05, contrast = c("Design", "RepD", "RepN")) 
+summary(RepDN)
+
+# write the file as a csv
+write.csv(as.data.frame(RepDN), 
+          file="RepDN_DESeqresults.csv")
+
+#Colim
+CoDN <- results(ddsObj, alpha = 0.05, contrast = c("Design", "CoD", "CoN")) 
+summary(CoDN)
+
+# write the file as a csv
+write.csv(as.data.frame(CoDN), 
+          file="CoDN_DESeqresults.csv")
+
+#Felim
+FeDN <- results(ddsObj, alpha = 0.05, contrast = c("Design", "FeD", "FeN")) 
+summary(FeDN)
+
+# write the file as a csv
+write.csv(as.data.frame(FeDN), 
+          file="FeDN_DESeqresults.csv")
+
+#Plim
+PDN <- results(ddsObj, alpha = 0.05, contrast = c("Design", "PhD", "PhN")) 
+summary(PDN)
+
+# write the file as a csv
+write.csv(as.data.frame(PDN), 
+          file="PDN_DESeqresults.csv")
+
+# Colim vs Replete Day
+## Colim_Day v Replete_Day means that positive is upregulated for Co relative to Rep
+resCoRepDay <- results(ddsObj, alpha = 0.05, contrast = c("Design", "CoD", "RepD")) 
+summary(resCoRepDay)
+
+# write the file as a csv
+write.csv(as.data.frame(resCoRepDay), 
+          file="CoRepDay_DESeqresults.csv")
+
+# Felim vs Replete Day
+resFeRepDay <- results(ddsObj, alpha = 0.05, contrast = c("Design", "FeD", "RepD"))
+## extracts only Felim Day vs Replete Day results
+## Felim_Day v Replete_Day means that positive is upregulated for Fe relative to Rep
+summary(resFeRepDay)
+
+# write the file as a csv
+write.csv(as.data.frame(resFeRepDay), 
+          file="FeRepDay_DESeqresults.csv")
+
+# Plim vs Replete Day
+resPRepDay <- results(ddsObj, alpha = 0.05, contrast = c("Design", "PhD", "RepD")) 
+## extracts only Plim Day vs Replete Day results
+## Plim_Day v Replete_Day means that positive is upregulated for P relative to Rep
+summary(resPRepDay)
+
+# write the file as a csv
+write.csv(as.data.frame(resPRepDay), 
+          file="PRepDay_DESeqresults.csv")
+
+
+####### DESeq2 Night v Replete #######
+
+# Colim vs Replete Night
+resCoRepNite <- results(ddsObj, alpha = 0.05, contrast = c("Design", "CoN", "RepN")) 
+## extracts only Colim Night vs Replete Night results
+## Colim_Night v Replete_Night means that positive is upregulated for Co relative to Rep
+summary(resCoRepNite)
+
+# write the file as a csv
+write.csv(as.data.frame(resCoRepNite), 
+          file="CoRepNite_DESeqresults.csv")
+
+# Felim vs Replete Night
+resFeRepNite <- results(ddsObj, alpha = 0.05, contrast = c("Design", "FeN", "RepN")) 
+## extracts only Felim Night vs Replete Night results
+## Felim_Night v Replete_Night means that positive is upregulated for Fe relative to Rep
+summary(resFeRepNite)
+
+# write the file as a csv
+write.csv(as.data.frame(resFeRepNite), 
+          file="FeRepNite_DESeqresults.csv")
+
+# Plim vs Replete Night
+resPRepNite <- results(ddsObj, alpha = 0.05, contrast = c("Design", "PhN", "RepN")) 
+## extracts only Plim Night vs Replete Night results
+## Plim_Night v Replete_Night means that positive is upregulated for P relative to Rep
+summary(resPRepNite)
+
+# write the file as a csv
+write.csv(as.data.frame(resPRepNite), 
+          file="PRepNite_DESeqresults.csv")
+
+
+# Felim vs Colim Day
+resFeCoDay <- results(ddsObj, alpha = 0.05, contrast = c("Design", "FeD", "CoD")) 
+## extracts only Plim Night vs Replete Night results
+## Plim_Night v Replete_Night means that positive is upregulated for P relative to Rep
+summary(resFeCoDay)
+
+# write the file as a csv
+write.csv(as.data.frame(resFeCoDay), 
+          file="FeCoDay_DESeqresults.csv")
+
+# Felim vs Colim Night
+resFeCoNite <- results(ddsObj, alpha = 0.05, contrast = c("Design", "FeN", "CoN")) 
+summary(resFeCoNite)
+
+# write the file as a csv
+write.csv(as.data.frame(resFeCoNite), 
+          file="FeCoNite_DESeqresults.csv")
+
+# Plim vs Colim Day
+
+resPCoDay <- results(ddsObj, alpha = 0.05, contrast = c("Design", "PhD", "CoD")) 
+summary(resPCoDay)
+
+# write the file as a csv
+write.csv(as.data.frame(resPCoDay), 
+          file="PCoDay_DESeqresults.csv")
+
+# Plim vs Colim Night
+
+resPCoNite <- results(ddsObj, alpha = 0.05, contrast = c("Design", "PhN", "CoN")) 
+summary(resPCoNite)
+
+# write the file as a csv
+write.csv(as.data.frame(resPCoNite), 
+          file="PCoNight_DESeqresults.csv")
+```
