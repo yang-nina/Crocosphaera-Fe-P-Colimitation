@@ -1,0 +1,390 @@
+---
+title: "Croco.GO.annot.compile"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "9/22/2021"
+updated: "3/8/2022"
+output: html_document
+---
+
+## Background
+
+The compilation of a gene ontology annotation for a new low, contig Crocosphaera WH0005 genome (Qu et al., 2022) was conducted following code provided by Erin Chille on GitHub referenced in Chille et al., 2021. 
+
+Qu et al., 2022: https://sfamjournals.onlinelibrary.wiley.com/doi/abs/10.1111/1758-2229.13041
+Chille et al., 2021: https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-021-08114-y
+
+## Load libraries
+
+**1. Install (if required) & upload packages into your current session**
+
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+if(!require(BiocManager)){install.packages("BiocManager")}
+if(!require(dplyr)){install.packages("dplyr")}
+if(!require(tidyverse)){install.packages("tidyverse")}
+if(!require(purrr)){install.packages("purrr")}
+if(!require(unpivotr)){install.packages("unpivotr")}
+```
+
+**2. Upload the package into your current session**
+```{r library, eval = TRUE, message = FALSE, warning = FALSE}
+library(BiocManager)
+library(tidyverse)
+library(GO.db)
+library(dplyr)
+```
+
+
+## GO Annotation
+
+This script will take the results from the DIAMOND blastx run, subsequent BLAST2GO mapping with InterProScan annotation, and Uniprot annotation to functionally annotate the Crocosphaera WH0005 genome with Gene Ontology (GO) terms.
+
+**Blast**
+
+Blastx using DIAMOND took place on September 5, 2021 using the NCBI nr database downloaded August 31, 2021. 
+
+```{r blastx, eval = TRUE, message = FALSE, warning = FALSE}
+blast <- read_tsv("Croco_annot_diamond.tsv", col_names = FALSE) # this is the output from DIAMOND blastx
+head(blast)
+colnames(blast) <- c("seqName", "tophit", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore",  "qlen", "slen") # rename columns
+summary(blast)
+head(blast)
+dim(blast) #5,065 genes identified through diamond blast (total list of 5,924)
+
+```
+
+**Uniprot**
+
+Uniprot mapping took place on September 5, 2021. 
+
+834 EMBL / GENBANK / DDBJ / CDS / IDs were mapped to 834 UniProtKB IDs
+
+```{r uniprot_blast, eval = TRUE, message = FALSE, warning = FALSE}
+uniprot_1 <- read_tsv("Croco_uniprot_blast.tsv", col_names = TRUE)
+uniprot_1 <- uniprot_1[,c(1,3:10)] # select relevant columns
+colnames(uniprot_1) <- c("tophit", "uniprotkb_entry", "status", "protein_names", "gene_names", "organism", "length", "gene_ontology", "go_ids")
+head(uniprot_1)
+dim(uniprot_1)
+
+```
+
+629 Refseq Protein IDs were Mapped to 934 UniProtKB IDs
+
+```{r uniprot_refseq, eval = TRUE, message = FALSE, warning = FALSE}
+uniprot_2 <- read_tsv("Croco_uniprot_refseq.tsv", col_names = TRUE)
+uniprot_2 <- uniprot_2[,c(1,3:10)]
+colnames(uniprot_2) <- c("tophit", "uniprotkb_entry", "status", "protein_names", "gene_names", "organism", "length", "gene_ontology", "go_ids")
+head(uniprot_2)
+dim(uniprot_2)
+
+```
+
+**Compile Uniprot Results**
+
+```{r compile_uniprot, eval = TRUE, message = FALSE, warning = FALSE}
+Uniprot_results <- bind_rows(uniprot_1, uniprot_2) # combines uniprot results
+Uniprot_results <- unique(Uniprot_results)
+Uniprot_results$go_ids <- gsub(" ", "", Uniprot_results$go_ids) # remove unwanted spaces
+head(Uniprot_results)
+dim(Uniprot_results)
+
+Uniprot_results$gene_ontology <- gsub(" \\[.*?\\]", "", Uniprot_results$gene_ontology) #remove unwanted information within brackets to streamline compilation later on
+Uniprot_results$gene_ontology <- gsub("; ", ";", Uniprot_results$gene_ontology) #remove unwanted characters
+head(Uniprot_results)
+
+nrow(filter(Uniprot_results, grepl("GO:",go_ids))) #Genes with GO terms #1191
+
+```
+
+**Blast2GO** 
+
+Of 5,924 coding regions, 5,065 returned accessions via DIAMOND blastx. BLAST2GO GO mapping and IPS annotation identified 2,866 accessions with GO annotation.
+
+```{r blast2go_merge, eval = TRUE, message = FALSE, warning = FALSE}
+B2G_results <- read_tsv("blast2go_table.txt", col_names = TRUE)
+head(B2G_results)
+B2G_results <- B2G_results[,c(3:5, 7:8,10:11, 15:16)] # select the relevant columns
+head(B2G_results)
+colnames(B2G_results) <- c("seqName", "tophit", "length", "eValue", "simMean", "GO_IDs", "GO_names", "InterPro_GO_IDs", "InterPro_GO_names") # rename the relevant columns
+B2G_results$GO_IDs <- gsub(" ", "", B2G_results$GO_IDs) # remove unwanted spaces
+B2G_results$InterPro_GO_IDs <- gsub(" ", "", B2G_results$InterPro_GO_IDs) # remove unwanted spaces
+head(B2G_results)
+B2G_results$InterPro_GO_IDs <- gsub("noGOterms", "NA", B2G_results$InterPro_GO_IDs) # replace with NA
+B2G_results$InterPro_GO_names <- gsub("no GO terms", "NA", B2G_results$InterPro_GO_names) # replace with NA
+B2G_results$InterPro_GO_IDs <- gsub("noIPSmatch", "NA", B2G_results$InterPro_GO_IDs) # replace with NA
+B2G_results$InterPro_GO_names <- gsub("no IPS match", "NA", B2G_results$InterPro_GO_names) # replace with NA
+head(B2G_results)
+dim(B2G_results)
+nrow(filter(B2G_results, grepl("GO:",GO_IDs))) # 2866 GO
+nrow(filter(B2G_results, grepl("GO:",InterPro_GO_IDs))) # 2450 IPS
+
+B2G_results_clean = B2G_results %>% 
+  unite(concat_IDs, c(GO_IDs, InterPro_GO_IDs), sep = ";", remove = FALSE) %>%
+  unite(concat_ontology, c(GO_names, InterPro_GO_names), sep = ";", remove = FALSE)  # merge GO and IPS IDs
+head(B2G_results_clean)
+B2G_results_clean$concat_ontology <- gsub("; ", ";", B2G_results_clean$concat_ontology) # remove unwanted space after ;
+head(B2G_results_clean$concat_ontology)
+
+B2G_results_clean$concat_IDs <- sapply(B2G_results_clean$concat_IDs, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";")) # remove duplicated IDs after merge
+B2G_results_clean$concat_ontology <- sapply(B2G_results_clean$concat_ontology, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";")) # remove duplicated terms after merge
+head(B2G_results_clean)
+B2G_results_clean$concat_IDs <- gsub("F:", "", B2G_results_clean$concat_IDs) # remove unwanted characters for downstream processing
+B2G_results_clean$concat_ontology <- gsub("F:", "", B2G_results_clean$concat_ontology) # remove unwanted characters for downstream processing
+B2G_results_clean$concat_IDs <- gsub("P:", "", B2G_results_clean$concat_IDs) # remove unwanted characters for downstream processing
+B2G_results_clean$concat_ontology <- gsub("P:", "", B2G_results_clean$concat_ontology) # remove unwanted characters for downstream processing
+B2G_results_clean$concat_IDs <- gsub("C:", "", B2G_results_clean$concat_IDs) # remove unwanted characters for downstream processing
+B2G_results_clean$concat_ontology <- gsub("C:", "", B2G_results_clean$concat_ontology) # remove unwanted characters for downstream processing
+
+dim(B2G_results_clean)
+nrow(filter(B2G_results_clean, grepl("GO:",concat_IDs))) #2866 accessions total (same as GO mapping)
+head(B2G_results_clean)
+tail(B2G_results_clean)
+dim(B2G_results_clean)
+
+```
+
+**Find unique and overlapping GO terms**
+Generate lists of GO terms for each method
+
+```{r unique_overlap, eval = TRUE, message = FALSE, warning = FALSE}
+Uniprot_GO <- dplyr::select(Uniprot_results, tophit, go_ids)
+splitted <- strsplit(as.character(Uniprot_GO$go_ids), ";") # split into multiple GO ids
+gene_ontology <- data.frame(v1 = rep.int(Uniprot_GO$tophit, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+head(gene_ontology)
+colnames(gene_ontology) <- c("gene_id", "GO.ID")
+head(gene_ontology)
+Uniprot.GOterms <- dplyr::select(gene_ontology, gene_id, GO.ID)
+Uniprot.GOterms$GO.ID<- as.character(Uniprot.GOterms$GO.ID)
+Uniprot.GOterms[Uniprot.GOterms == 0] <- "unknown"
+Uniprot.GOterms$GO.ID <- replace_na(Uniprot.GOterms$GO.ID, "unknown") # replace NAs
+head(Uniprot.GOterms)
+Uniprot.GOterms$GO.ID <- as.factor(Uniprot.GOterms$GO.ID)
+Uniprot.GOterms$gene_id <- as.factor(Uniprot.GOterms$gene_id)
+Uniprot.GOterms$GO.ID <- gsub(" ", "", Uniprot.GOterms$GO.ID) # remove unwanted spaced
+Uniprot.GOterms <- unique(Uniprot.GOterms)
+nrow(Uniprot.GOterms) # 3022 rows / terms
+head(Uniprot.GOterms)
+
+B2G_GO <- dplyr::select(B2G_results_clean, tophit, concat_IDs)
+splitted <- strsplit(as.character(B2G_GO$concat_IDs), ";") # split into multiple GO ids
+gene_ontology <- data.frame(v1 = rep.int(B2G_GO$tophit, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+dim(gene_ontology)
+colnames(gene_ontology) <- c("gene_id", "GO.ID")
+gene_ontology <- filter(gene_ontology, !is.na(gene_id)) # remove entries where gene_id (accession) is NA
+dim(gene_ontology)
+B2G.GOterms <- dplyr::select(gene_ontology, gene_id, GO.ID)
+B2G.GOterms$gene_id <- as.character(B2G.GOterms$gene_id)
+B2G.GOterms$GO.ID <- as.character(B2G.GOterms$GO.ID)
+B2G.GOterms[B2G.GOterms == 0] <- "unknown"
+B2G.GOterms$GO.ID <- tidyr::replace_na(B2G.GOterms$GO.ID, "unknown")
+B2G.GOterms$GO.ID <- gsub("NA", "unknown", B2G.GOterms$GO.ID)
+head(B2G.GOterms)
+B2G.GOterms$GO.ID <- as.factor(B2G.GOterms$GO.ID)
+B2G.GOterms$gene_id <- as.factor(B2G.GOterms$gene_id)
+B2G.GOterms$GO.ID <- gsub(" ", "", B2G.GOterms$GO.ID) # remove unwanted spaces
+B2G.GOterms <- unique(B2G.GOterms)
+nrow(B2G.GOterms) # 9,040 terms
+head(B2G.GOterms) 
+
+# Find intersections and unique results for each methods
+UB <- dplyr::intersect(B2G.GOterms, Uniprot.GOterms) # Blast2GO and Uniprot intersection
+nrow(UB) # 2591 terms intersect
+Uunique <- dplyr::setdiff(Uniprot.GOterms, B2G.GOterms) # Uniprot unique
+nrow(Uunique) # 431 terms
+Bunique <- dplyr::setdiff(B2G.GOterms, Uniprot.GOterms) # Blast unique
+nrow(Bunique) # 6449 terms
+
+```
+
+**Merge Annotations**
+
+Match tophits with description
+
+```{r merge_annot, eval = TRUE, message = FALSE, warning = FALSE}
+Croco_annot <- left_join(blast, B2G_results_clean, by="seqName")
+head(Croco_annot)
+tail(Croco_annot)
+dim(Croco_annot)
+Croco_annot <- select(Croco_annot, seqName, tophit.x, length.x, evalue, bitscore, simMean, concat_IDs, concat_ontology)
+Croco_annot <- dplyr::rename(Croco_annot, "tophit" = "tophit.x")
+head(Croco_annot)
+
+Croco_annot <- left_join(Croco_annot, Uniprot_results, by ="tophit")
+head(Croco_annot)
+dim(Croco_annot) # increase initially in annotation rows due to adding uniprot results (5389)
+Croco_annot$GO <- paste(Croco_annot$concat_IDs, Croco_annot$go_ids, sep=';') # generate new column with concatenated GO IDs
+head(Croco_annot)
+Croco_annot$GO_terms <- paste(Croco_annot$concat_ontology, Croco_annot$gene_ontology, sep=';') # generate new column with concatenated GO IDs
+Croco_annot <- select(Croco_annot,-c("concat_IDs", "concat_ontology", "gene_ontology", "go_ids", "length", "uniprotkb_entry", "status", "protein_names", "gene_names", "organism"))
+head(Croco_annot)
+tail(Croco_annot)
+colnames(Croco_annot) <- c("gene_id", "description", "length","eValue", "bitscore","simMean", "GO_IDs","GO_terms")
+names(Croco_annot)
+head(Croco_annot)
+tail(Croco_annot)
+dim(Croco_annot)
+
+# need to remove duplicate GO terms after merging Uniprot and blast 
+Croco_annot$GO_IDs <- sapply(Croco_annot$GO_IDs, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";"))
+Croco_annot$GO_terms <- sapply(Croco_annot$GO_terms, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";"))
+Croco_annot$GO_IDs <- gsub(";NA", "", Croco_annot$GO_IDs)
+Croco_annot$GO_terms <- gsub(";NA", "", Croco_annot$GO_terms)
+Croco_annot$GO_IDs <- gsub("NA;", "", Croco_annot$GO_IDs)
+Croco_annot$GO_terms <- gsub("NA;", "", Croco_annot$GO_terms)
+dim(Croco_annot)
+head(Croco_annot)
+
+median(Croco_annot$eValue) #2.66e-75
+median(Croco_annot$bitscore) #235
+
+df <- Croco_annot %>%
+  filter(GO_IDs != "NA") # remove entries without GO terms
+
+head(df)
+
+dim(df) # 3050 x 8
+
+kegg <- read_csv("Croco_kegg_annot.csv", col_names = TRUE) # read in KEGG annotation (this is based on KOfamScan annotation from Qu et al., 2022)
+head(kegg)
+dim(kegg)
+
+#rename this to annotate with KO
+colnames(df)[1] <- "id"
+head(df)
+
+# KEGG annotation
+KO_annot <- left_join(df, kegg, by="id")
+
+head(KO_annot)
+dim(KO_annot) # only the genes that have GO annotation
+
+write.csv(KO_annot, "Croco_annot_compiled_final_new.csv", row.names = TRUE)
+
+```
+
+**Build GO ID / TERM Annotation Database for Enrichment Analysis**
+
+This takes the score with a list of GO IDs separated by ";" and creates an individual row for each GO ID and the associated gene_id. This will be used for GO enrichment analysis after DESeq2.
+
+```{r split_annot, eval = TRUE, message = FALSE, warning = FALSE}
+
+# This is used for the "universe" for enrichment analysis. Split the collated GO IDs into individual rows associated by gene_id. The gene_id list will include merged KOs (combine replicate KOs to generate "unique"" KOs) and numeric (assigned) gene_ids.
+
+df <- read_csv("Croco_annot_compiled_final_new.csv", col_names = TRUE) # load the annotation file
+head(df)
+tail(df)
+colnames(df)
+
+df <- (df[, c(2, 8:12)]) # extract relevant columns
+dim(df)
+head(df)
+
+# split the dataset by KOs that are "none" and everything else
+none_df = dplyr::filter(df, KO == "none")
+head(none_df)
+dim(none_df)
+ids <- none_df$gene_id # replace "none" with the gene_id
+head(ids)
+none_df <- cbind(none_df, ids)
+head(none_df)
+tail(none_df)
+colnames(none_df)
+none_df <- dplyr::select(none_df, 1:4)
+head(none_df)
+names(none_df)[4] <- "KO" # rename as "KO" # this column includes the accession codes from blastx and not actual KO identifiers
+colnames(none_df)
+
+# for those that are KO-annotated:
+KO_df = dplyr::filter(df, KO != "none")
+head(KO_df)
+dim(KO_df)
+               
+IDs_KO_df <- KO_df %>% group_by(KO) %>% 
+  mutate(GO_IDs = paste(GO_IDs, collapse = ";")) %>% distinct(KO, .keep_all = TRUE) # this gets unique KOs and merges GO_IDs
+
+dim(IDs_KO_df) # 1759 x 4
+head(IDs_KO_df)
+
+terms_KO_df <- KO_df %>% group_by(KO) %>% 
+  mutate(GO_terms = paste(GO_terms, collapse = ";")) %>% distinct(KO, .keep_all = TRUE) # this gets unique KOs and merges terms
+
+dim(terms_KO_df) # 1759 x 4
+head(terms_KO_df)
+
+IDs_terms <- dplyr::setdiff(IDs_KO_df$KO, terms_KO_df$KO)
+IDs_terms <- dplyr::intersect(IDs_KO_df$KO, terms_KO_df$KO)
+nrow(IDs_terms) # this should be null (none because the list should be identical)
+
+# combine these two such that the GO_IDs and GO_terms are replaced with the correct merged lists.
+head(IDs_KO_df)
+head(terms_KO_df)
+
+IDs <- dplyr::select(IDs_KO_df, 1, 2, 6)
+head(IDs)
+dim(IDs)
+terms <- dplyr::select(terms_KO_df, 1, 3)
+head(terms)
+dim(terms)
+
+kegg_annot <- left_join(IDs, terms, by = "KO") 
+head(kegg_annot)
+kegg_annot <- dplyr::select(kegg_annot, -c(4)) # remove duplicate id column
+names(kegg_annot)[1] <- "gene_id"
+head(kegg_annot)
+kegg_annot <- kegg_annot[, c(1, 2, 4, 3)] # reorder columns
+head(kegg_annot)
+dim(kegg_annot)
+
+# now we have to combine the merged KOs and GO terms with the genes that do not have KO annotation
+head(none_df)
+colnames(none_df)[1] <- "gene_id" # rename column 1 to gene_id
+head(kegg_annot)
+final_KO_annot <- rbind(kegg_annot, none_df)
+head(final_KO_annot)
+tail(final_KO_annot)
+dim(final_KO_annot) # final annotation worksheet for Crocosphaera files where duplicated KOs are merged; also the "nones" are replaced with blastx accession ids
+
+# need to remove duplicate GO terms after merging rows based on KOs
+final_KO_annot$GO_IDs <- sapply(final_KO_annot$GO_IDs, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";"))
+final_KO_annot$GO_terms <- sapply(final_KO_annot$GO_terms, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";"))
+head(final_KO_annot)
+tail(final_KO_annot)
+dim(final_KO_annot)
+
+splitted <- strsplit(as.character(final_KO_annot$GO_IDs), ";") # split into multiple GO ids
+head(splitted)
+df_split <- data.frame(v1 = rep.int(final_KO_annot$KO, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+head(df_split, 10)
+tail(df_split, 10)
+dim(df_split)
+colnames(df_split) <- c("gene_id", "GO.ID") # rename columns
+head(df_split) # check colnames
+
+# I need to annotate GO IDs with GO Terms in the df_split output. I tried splitting the GO.ID and GO.Term separately and then recombining them but realized the dimensions of the files were different. Part of the reason is that different databases may have annotated some of the GO Terms differently so removing duplicates did not work. For example,ATPase activity and ATP hydrolysis activity are technically the same. Thus, I am doing a 1:1 comparison of GO.ID and GO.Term against the GO.db.
+
+goterms <- Term(GOTERM) # extract terms
+ontology <- Ontology(GOTERM)
+df <- as.data.frame(goterms, col_names = TRUE) # create a dataframe of goterms
+df_ont <- as.data.frame(ontology, col_names = TRUE)
+write.csv(df, file="goterms.csv", row.names = TRUE) # write as a csv
+write.csv(df_ont, file="ontology.csv", row.names = TRUE) # write as a csv
+go <- read_csv("goterms.csv", col_names = TRUE) # read the csv back into R to manipulate (I realize this could be a roundabout way to get the formatting correct but it worked!)
+ont <- read_csv("ontology.csv", col_names = TRUE)
+colnames(go) <- c("GO.ID", "GO.Term") # rename col names
+head(go)
+dim(go)
+colnames(ont) <- c("GO.ID", "GO.Ontology") # rename col names
+head(ont)
+dim(ont)
+
+head(df_split) # check col names of the split annotation dataframe
+
+universe <- left_join(df_split, go, by="GO.ID") # join the two dataframes using GO.ID, left join includes all rows in df_split in this case
+head(universe)
+universe <- left_join(universe, ont, by = "GO.ID") # join dataframe with ontology
+head(universe)
+tail(universe)
+dim(universe) # should be 6116
+
+write.csv(universe, file="Croco_GO_KO_database.csv", row.names = TRUE) # will serve as universe for enricher analysis
+
+```
