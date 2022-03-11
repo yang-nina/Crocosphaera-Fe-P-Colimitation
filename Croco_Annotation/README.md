@@ -11,5 +11,4 @@ This folder includes files and code necessary to annotate the Crocosphaera genom
       -  Output file: Croco_annot_compiled_final_new.csv
       -  Output file: goterms.csv
       -  Output file: ontology.csv
-      -  Output file: goterms.csv
       -  Output file: Croco_GO_KO_database.csv
