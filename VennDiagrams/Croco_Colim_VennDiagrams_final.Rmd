@@ -1,0 +1,868 @@
+---
+title: "CrocoColim_VennDiagrams"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "9/29/2021"
+updated: "3/11/2022"
+output: html_document
+---
+
+
+## Background
+
+This document outlines the steps taken to analyze the RNASeq data after DESeq2 using Venn Diagrams. It also extracts the vectors of differentially expressed genes corresponding to each section of the Venn Diagram for downstream analysis. 
+
+## Load libraries
+
+**1. Install (if required) & upload packages into your current session**
+
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+if(!require(dplyr)){install.packages("dplyr")}
+if(!require(tidyverse)){install.packages("tidyverse")}
+if(!require(VennDiagram)){install.packages("VennDiagram")}
+if(!require(VennDiagram)){install.packages("gridExtra")}
+if(!require(VennDiagram)){install.packages("grid")}
+if(!require(VennDiagram)){install.packages("lattice")}
+```
+
+**2. Upload the package into your current session**
+```{r library, eval = TRUE, message = FALSE, warning = FALSE}
+library("tidyverse")
+library("dplyr")
+library("VennDiagram")
+library("gridExtra")
+library("grid")
+library("lattice")
+```
+
+**3. Process the DESeq2 outputs to generate Venn Diagrams inputs**
+
+```{r DN_input, eval = TRUE, message = FALSE, warning = FALSE}
+
+cts <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CrocoColim_trimmed_forDESeq2.csv")
+head(cts)
+gene_id <- cts$gene_id # extract gene_id to add to the other dataframes. The numeric ordering of these files is the same as the input file which has gene_id as well.
+head(gene_id)
+
+# set up day vs night dataframes for VD analysis
+rep <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepDN_DESeqresults.csv")
+head(rep)
+
+co <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoDN_DESeqresults.csv")
+head(co)
+
+fe <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeDN_DESeqresults.csv")
+head(fe)
+
+p <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PDN_DESeqresults.csv")
+head(p)
+
+# replete 
+rep_df <- cbind(gene_id, rep) # append gene_ids
+summary(rep_df)
+head(rep_df)
+repDN <- dplyr::select(rep_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(repDN)
+dim(repDN)
+repDN.vector <- dplyr::filter(repDN, padj < 0.05) # all the differentially expressed replete DN genes 
+head(repDN.vector)
+repDN.vector <- dplyr::select(repDN.vector, gene_id, log2FoldChange) #remove padj column
+dim(repDN.vector)
+head(repDN.vector)
+names(repDN.vector)[2] <- "repDN_FC"
+head(repDN.vector)
+
+# colim
+co_df <- cbind(gene_id, co)
+head(co_df)
+summary(co_df)
+coDN <- dplyr::select(co_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(coDN)
+dim(coDN)
+coDN.vector <- dplyr::filter(coDN, padj < 0.05) # all the differentially expressed colim DN genes 
+coDN.vector <- dplyr::select(coDN.vector, gene_id, log2FoldChange)
+dim(coDN.vector)
+head(coDN.vector)
+names(coDN.vector)[2] <- "coDN_FC"
+head(coDN.vector)
+
+
+fe_df <- cbind(gene_id, fe)
+head(fe_df)
+summary(fe_df)
+feDN <- dplyr::select(fe_df, gene_id, log2FoldChange, padj) # select relevant felumns
+head(feDN)
+dim(feDN)
+feDN.vector <- dplyr::filter(feDN, padj < 0.05) # all the differentially expressed felim DN genes 
+feDN.vector <- dplyr::select(feDN.vector, gene_id, log2FoldChange)
+dim(feDN.vector)
+head(feDN.vector)
+names(feDN.vector)[2] <- "feDN_FC"
+head(feDN.vector)
+
+p_df <- cbind(gene_id, p)
+head(p_df)
+summary(p_df)
+pDN <- dplyr::select(p_df, gene_id, log2FoldChange, padj) # select relevant plumns
+head(pDN)
+dim(pDN)
+pDN.vector <- dplyr::filter(pDN, padj < 0.05) # all the differentially expressed plim DN genes 
+pDN.vector <- dplyr::select(pDN.vector, gene_id, log2FoldChange)
+dim(pDN.vector)
+head(pDN.vector)
+names(pDN.vector)[2] <- "pDN_FC"
+head(pDN.vector)
+
+# build a Day vs Night dataframe that combines, rep, co, fe, and p differentially expressed genes
+
+# start with the list of all relevant genes (the full list of deduped and trimmed list of genes)
+id <- cts[, 1:2] # extract relevant columns 
+head(id)
+dim(id)
+names(id)[1] <- "gene_num" # rename first column to something sensible
+DN.vector <- left_join(id, repDN.vector, by = "gene_id")
+head(DN.vector)
+dim(DN.vector)
+DN.vector <- left_join(DN.vector, coDN.vector, by = "gene_id")
+dim(DN.vector)
+head(DN.vector)
+DN.vector <- left_join(DN.vector, feDN.vector, by = "gene_id")
+head(DN.vector)
+dim(DN.vector)
+DN.vector <- left_join(DN.vector, pDN.vector, by = "gene_id") # this is the final vector with all genes anontated with either FC (if differentially expressed at p < .05 or NA)
+dim(DN.vector)
+head(DN.vector, 10)
+tail(DN.vector, 10)
+DN.vector <- dplyr::select(DN.vector, gene_id, repDN_FC:pDN_FC)
+head(DN.vector)
+
+```
+
+```{r DN_venn, eval = TRUE, message = FALSE, warning = FALSE}
+
+# build Venn Diagram input
+venn_df <- DN.vector %>%
+  gather(key = exp_type, value = foldchange, -c(gene_id))
+glimpse(venn_df)
+
+#### this is for all diel genes
+venn_rep <- venn_df %>% 
+  filter(exp_type == "repDN_FC" & !is.na(foldchange)) %>% 
+  pull(gene_id)
+
+venn_co <- venn_df %>% 
+  filter(exp_type == "coDN_FC" & !is.na(foldchange)) %>% 
+  pull(gene_id)
+
+venn_fe <- venn_df %>% 
+  filter(exp_type == "feDN_FC" & !is.na(foldchange)) %>% 
+  pull(gene_id)
+
+venn_p <- venn_df %>% 
+  filter(exp_type == "pDN_FC" & !is.na(foldchange)) %>% 
+  pull(gene_id)
+
+## this is for positive fold change (increase in abundance)
+pos_venn_rep <- venn_df %>% 
+  filter(exp_type == "repDN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_co <- venn_df %>% 
+  filter(exp_type == "coDN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_fe <- venn_df %>% 
+  filter(exp_type == "feDN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_p <- venn_df %>% 
+  filter(exp_type == "pDN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+## this is for negative fold change (decrease in abundance)
+neg_venn_rep <- venn_df %>% 
+  filter(exp_type == "repDN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_co <- venn_df %>% 
+  filter(exp_type == "coDN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_fe <- venn_df %>% 
+  filter(exp_type == "feDN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_p <- venn_df %>% 
+  filter(exp_type == "pDN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+summary(venn_rep)
+summary(venn_co)
+summary(venn_fe)
+summary(venn_p)
+
+summary(pos_venn_rep)
+summary(pos_venn_co)
+summary(pos_venn_fe)
+summary(pos_venn_p)
+
+summary(neg_venn_rep)
+summary(neg_venn_co)
+summary(neg_venn_fe)
+summary(neg_venn_p)
+
+# all diel genes (does not differentiate day and night)
+venn_list_diel <- list("P-limited" = venn_p,
+                       "Fe-limited" = venn_fe,
+                       "Co-limited" = venn_co,
+                       "Replete" = venn_rep)
+
+# day genes
+venn_list_pos <- list("P-limited" = pos_venn_p,
+                      "Fe-limited" = pos_venn_fe,
+                      "Co-limited" = pos_venn_co,
+                      "Replete" = pos_venn_rep)
+
+# night genes
+venn_list_neg <- list("P-limited" = neg_venn_p,
+                      "Fe-limited" = neg_venn_fe,
+                      "Co-limited" = neg_venn_co, 
+                      "Replete" = neg_venn_rep)
+
+
+#  All Diel DEG Venn Diagrams - build Venn Diagram and extract gene lists
+
+venn <- venn.diagram(venn_list_diel, NULL,
+                          col = "transparent",
+                          fill = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_diel_total_small.pdf",
+    width = 2, height = 3,
+    bg = "white")
+grid.draw(venn)
+dev.off()
+
+
+# Diel DEG Venn Diagrams - build Venn Diagram and extract gene lists
+
+venn <- venn.diagram(venn_list_pos, NULL,
+                          col = "transparent",
+                          fill = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_diel_day.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram
+
+list <- calculate.overlap(venn_list_pos)
+
+summary(list)
+
+# list of overlap for all treatments; this shows the core of genes that are shared (diel) across the 4 treatments
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_core_day_rna.csv", row.names = TRUE)
+
+# shared between colim + felim
+write.csv(list$a13,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_CoFe_day_rna.csv", row.names = TRUE)
+
+# shared between colim + plim
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_CoP_day_rna.csv", row.names = TRUE)
+
+# shared between colim + replete
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_CoRep_day_rna.csv", row.names = TRUE)
+
+# unique to colim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_CoUni_day_rna.csv", row.names = TRUE)
+
+# unique to felim
+write.csv(list$a14,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_FeUni_day_rna.csv", row.names = TRUE)
+
+# unique plim
+write.csv(list$a9,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_PUni_day_rna.csv", row.names = TRUE)
+
+# unique replete
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_RepUni_day_rna.csv", row.names = TRUE)
+
+# shared between P, Co, Fe
+write.csv(list$a12,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_PCoFe_day_rna.csv", row.names = TRUE)
+
+# shared between P and Fe
+write.csv(list$a15,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_PFe_day_rna.csv", row.names = TRUE)
+
+# shared between P and Replete
+write.csv(list$a10,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_PRep_day_rna.csv", row.names = TRUE)
+
+# shared between Co, Fe and Replete
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq//VD_CoFeRep_day_rna.csv", row.names = TRUE)
+
+# shared between Co, P, Replete
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_CoPRep_day_rna.csv", row.names = TRUE)
+
+# shared between Fe, Replete
+write.csv(list$a8,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_FeRep_day_rna.csv", row.names = TRUE)
+
+# shared between P, Fe, Replete
+write.csv(list$a11,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_PFeRep_day_rna.csv", row.names = TRUE)
+
+
+# Night Diel DEG Venn Diagrams - build Venn Diagram and extract gene lists
+
+venn <- venn.diagram(venn_list_neg, NULL,
+                          col = "transparent",
+                          fill = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#4DBBD5FF", "#3C5488FF", "#00A087FF", "#F39B7FFF"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_diel_night.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram (no more manual analysis!!!!!!)
+
+## this is for up!!
+list <- calculate.overlap(venn_list_neg)
+
+summary(list)
+
+# list of overlap for all treatments; this shows the core of genes that are shared (diel) across the 4 treatments
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_core_rna.csv", row.names = TRUE)
+
+# shared between colim + felim
+write.csv(list$a13,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoFe_rna.csv", row.names = TRUE)
+
+# shared between colim + plim
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoP_rna.csv", row.names = TRUE)
+
+# shared between colim + replete
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoRep_rna.csv", row.names = TRUE)
+
+# unique up to colim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoUni_rna.csv", row.names = TRUE)
+
+# unique up to felim
+write.csv(list$a14,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_FeUni_rna.csv", row.names = TRUE)
+
+# unique up to plim
+write.csv(list$a9,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_PUni_rna.csv", row.names = TRUE)
+
+# unique up to replete
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_RepUni_rna.csv", row.names = TRUE)
+
+# shared between P, Co, Fe
+write.csv(list$a12,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_PCoFe_rna.csv", row.names = TRUE)
+
+# shared between P and Fe
+write.csv(list$a15,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_PFe_rna.csv", row.names = TRUE)
+
+# shared between P and Replete
+write.csv(list$a10,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_PRep_rna.csv", row.names = TRUE)
+
+# shared between Co, Fe and Replete
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoFeRep_rna.csv", row.names = TRUE)
+
+# shared between Co, P, Replete
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_CoPRep_rna.csv", row.names = TRUE)
+
+# shared between Fe, Replete
+write.csv(list$a8,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_FeRep_rna.csv", row.names = TRUE)
+
+# shared between P, Fe, Replete
+write.csv(list$a11,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_night_PFeRep_rna.csv", row.names = TRUE)
+
+```
+
+```{r vRep_input, eval = TRUE, message = FALSE, warning = FALSE}
+
+# set up day vs night dataframes for VD analysis
+corepday <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRepDay_DESeqresults.csv")
+head(corepday)
+
+ferepday <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRepDay_DESeqresults.csv")
+head(ferepday)
+
+prepday <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRepDay_DESeqresults.csv")
+head(prepday)
+
+corepnite <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRepNite_DESeqresults.csv")
+head(corepnite)
+
+ferepnite <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRepNite_DESeqresults.csv")
+head(ferepnite)
+
+prepnite <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRepNite_DESeqresults.csv")
+head(prepnite)
+
+# co v rep
+corepD_df <- cbind(gene_id, corepday) # append gene_ids
+summary(corepD_df)
+head(corepD_df)
+corepD <- dplyr::select(corepD_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(corepD)
+dim(corepD)
+corepD.vector <- dplyr::filter(corepD, padj < 0.05) # all the differentially expressed replete D genes 
+corepD.vector <- dplyr::select(corepD.vector, gene_id, log2FoldChange)
+dim(corepD.vector)
+head(corepD.vector)
+names(corepD.vector)[2] <- "corepD_FC"
+head(corepD.vector)
+
+# fe v rep
+ferepD_df <- cbind(gene_id, ferepday)
+head(ferepD_df)
+summary(ferepD_df)
+ferepD <- dplyr::select(ferepD_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(ferepD)
+dim(ferepD)
+ferepD.vector <- dplyr::filter(ferepD, padj < 0.05) # all the differentially expressed colim DN genes 
+ferepD.vector <- dplyr::select(ferepD.vector, gene_id, log2FoldChange)
+dim(ferepD.vector)
+head(ferepD.vector)
+names(ferepD.vector)[2] <- "ferepD_FC"
+head(ferepD.vector)
+
+# p v rep
+prepD_df <- cbind(gene_id, prepday)
+head(prepD_df)
+summary(prepD_df)
+prepD <- dplyr::select(prepD_df, gene_id, log2FoldChange, padj) # select relevant felumns
+head(prepD)
+dim(prepD)
+prepD.vector <- dplyr::filter(prepD, padj < 0.05) # all the differentially expressed felim DN genes 
+prepD.vector <- dplyr::select(prepD.vector, gene_id, log2FoldChange)
+dim(prepD.vector)
+head(prepD.vector)
+names(prepD.vector)[2] <- "prepD_FC"
+head(prepD.vector)
+
+# co v rep
+corepN_df <- cbind(gene_id, corepnite) # append gene_ids
+summary(corepN_df)
+head(corepN_df)
+corepN <- dplyr::select(corepN_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(corepN)
+dim(corepN)
+corepN.vector <- dplyr::filter(corepN, padj < 0.05) # all the differentially expressed replete D genes 
+corepN.vector <- dplyr::select(corepN.vector, gene_id, log2FoldChange)
+dim(corepN.vector)
+head(corepN.vector)
+names(corepN.vector)[2] <- "corepN_FC"
+head(corepN.vector)
+
+# fe v rep
+ferepN_df <- cbind(gene_id, ferepnite)
+head(ferepN_df)
+summary(ferepN_df)
+ferepN <- dplyr::select(ferepN_df, gene_id, log2FoldChange, padj) # select relevant columns
+head(ferepN)
+dim(ferepN)
+ferepN.vector <- dplyr::filter(ferepN, padj < 0.05) # all the differentially expressed colim DN genes 
+ferepN.vector <- dplyr::select(ferepN.vector, gene_id, log2FoldChange)
+dim(ferepN.vector)
+head(ferepN.vector)
+names(ferepN.vector)[2] <- "ferepN_FC"
+head(ferepN.vector)
+
+# p v rep
+prepN_df <- cbind(gene_id, prepnite)
+head(prepN_df)
+summary(prepN_df)
+prepN <- dplyr::select(prepN_df, gene_id, log2FoldChange, padj) # select relevant felumns
+head(prepN)
+dim(prepN)
+prepN.vector <- dplyr::filter(prepN, padj < 0.05) # all the differentially expressed felim DN genes 
+prepN.vector <- dplyr::select(prepN.vector, gene_id, log2FoldChange)
+dim(prepN.vector)
+head(prepN.vector)
+names(prepN.vector)[2] <- "prepN_FC"
+head(prepN.vector)
+
+# build a Day vs Night dataframe that combines, rep, co, fe, and p differentially expressed genes
+
+# start with the list of all relevant genes (the full list of deduped and trimmed list of genes)
+id <- cts[, 1:2] # extract relevant columns 
+head(id)
+dim(id)
+names(id)[1] <- "gene_num" # rename first column to something sensible
+vRepD.vector <- left_join(id, corepD.vector, by = "gene_id")
+head(vRepD.vector)
+dim(vRepD.vector)
+vRepD.vector <- left_join(vRepD.vector, ferepD.vector, by = "gene_id")
+dim(vRepD.vector)
+head(vRepD.vector)
+vRepD.vector <- left_join(vRepD.vector, prepD.vector, by = "gene_id")
+head(vRepD.vector)
+dim(vRepD.vector) # this is the final vector with all genes anontated with either FC (if differentially expressed at p < .05 or NA)
+vRepD.vector <- dplyr::select(vRepD.vector, gene_id, corepD_FC:prepD_FC)
+head(vRepD.vector, 10)
+tail(vRepD.vector, 10)
+
+
+# start with the list of all relevant genes (the full list of deduped and trimmed list of genes)
+id <- cts[, 1:2] # extract relevant columns 
+head(id)
+dim(id)
+names(id)[1] <- "gene_num" # rename first column to something sensible
+vRepN.vector <- left_join(id, corepN.vector, by = "gene_id")
+head(vRepN.vector)
+dim(vRepN.vector)
+vRepN.vector <- left_join(vRepN.vector, ferepN.vector, by = "gene_id")
+dim(vRepN.vector)
+head(vRepN.vector)
+vRepN.vector <- left_join(vRepN.vector, prepN.vector, by = "gene_id")
+head(vRepN.vector)
+dim(vRepN.vector) # this is the final vector with all genes anontated with either FC (if differentially expressed at p < .05 or NA)
+vRepN.vector <- dplyr::select(vRepN.vector, gene_id, corepN_FC:prepN_FC)
+head(vRepN.vector, 10)
+tail(vRepN.vector, 10)
+
+```
+
+```{r vRep_venn, eval = TRUE, message = FALSE, warning = FALSE}
+
+# build Venn Diagram input
+venn_df <- vRepD.vector %>%
+  gather(key = exp_type, value = foldchange, -c(gene_id))
+glimpse(venn_df)
+
+## this is for positive fold change (increase in abundance)
+pos_venn_coD <- venn_df %>% 
+  filter(exp_type == "corepD_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_feD <- venn_df %>% 
+  filter(exp_type == "ferepD_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_pD <- venn_df %>% 
+  filter(exp_type == "prepD_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+## this is for negative fold change (decrease in abundance)
+
+neg_venn_coD <- venn_df %>% 
+  filter(exp_type == "corepD_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_feD <- venn_df %>% 
+  filter(exp_type == "ferepD_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_pD <- venn_df %>% 
+  filter(exp_type == "prepD_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+summary(pos_venn_coD)
+summary(pos_venn_feD)
+summary(pos_venn_pD)
+
+summary(neg_venn_coD)
+summary(neg_venn_feD)
+summary(neg_venn_pD)
+
+
+venn_list_pos <- list("P-limited" = pos_venn_pD,
+                      "Fe-limited" = pos_venn_feD,
+                      "Co-limited" = pos_venn_coD)
+
+venn_list_neg <- list("P-limited" = neg_venn_pD,
+                      "Fe-limited" = neg_venn_feD,
+                      "Co-limited" = neg_venn_coD)
+
+
+# nutrient limited Day Venn Diagrams - build Venn Diagram and extract gene lists
+
+venn <- venn.diagram(venn_list_pos, NULL,
+                          col = "transparent",
+                          fill = c("#FDB813", "#D14009", "#de5d83"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#FDB813", "#D14009", "#de5d83"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_vRep_up_day.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram
+
+list <- calculate.overlap(venn_list_pos)
+
+summary(list)
+
+#core overlap
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_core.csv", row.names = TRUE)
+
+# unique up colim
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_CoUni.csv", row.names = TRUE)
+
+# unique up felim
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_FeUni.csv", row.names = TRUE)
+
+# unique up plim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_PUni.csv", row.names = TRUE)
+
+# shared up Co + Fe
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_CoFe.csv", row.names = TRUE)
+
+# shared up Co + P
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_CoP.csv", row.names = TRUE)
+
+# shared up P + Fe
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_day_PFe.csv", row.names = TRUE)
+
+venn <- venn.diagram(venn_list_neg, NULL,
+                          col = "transparent",
+                          fill = c("#FDB813", "#D14009", "#de5d83"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#FDB813", "#D14009", "#de5d83"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_vRep_day_down.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram (no more manual analysis!!!!!!)
+list <- calculate.overlap(venn_list_neg)
+
+summary(list)
+
+#core overlap
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_core.csv", row.names = TRUE)
+
+# unique down colim
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_CoUni.csv", row.names = TRUE)
+
+# unique down felim
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_FeUni.csv", row.names = TRUE)
+
+# unique down plim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_PUni.csv", row.names = TRUE)
+
+# unique down Co + Fe
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_CoFe.csv", row.names = TRUE)
+
+# unique down Co + P
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_CoP.csv", row.names = TRUE)
+
+# unique down P + Fe
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_day_PFe.csv", row.names = TRUE)
+
+
+## night
+
+# build Venn Diagram input
+venn_df <- vRepN.vector %>%
+  gather(key = exp_type, value = foldchange, -c(gene_id))
+glimpse(venn_df)
+
+## this is for positive fold change (increase in abundance)
+pos_venn_coN <- venn_df %>% 
+  filter(exp_type == "corepN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_feN <- venn_df %>% 
+  filter(exp_type == "ferepN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+pos_venn_pN <- venn_df %>% 
+  filter(exp_type == "prepN_FC" & !is.na(foldchange) & foldchange > 0) %>% 
+  pull(gene_id)
+
+## this is for negative fold change (decrease in abundance)
+
+neg_venn_coN <- venn_df %>% 
+  filter(exp_type == "corepN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_feN <- venn_df %>% 
+  filter(exp_type == "ferepN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+neg_venn_pN <- venn_df %>% 
+  filter(exp_type == "prepN_FC" & !is.na(foldchange) & foldchange < 0) %>% 
+  pull(gene_id)
+
+summary(pos_venn_coN)
+summary(pos_venn_feN)
+summary(pos_venn_pN)
+
+summary(neg_venn_coN)
+summary(neg_venn_feN)
+summary(neg_venn_pN)
+
+
+venn_list_pos <- list("P-limited" = pos_venn_pN,
+                      "Fe-limited" = pos_venn_feN,
+                      "Co-limited" = pos_venn_coN)
+
+venn_list_neg <- list("P-limited" = neg_venn_pN,
+                      "Fe-limited" = neg_venn_feN,
+                      "Co-limited" = neg_venn_coN)
+
+
+# Day Diel DEG Venn Diagrams - build Venn Diagram and extract gene lists
+
+venn <- venn.diagram(venn_list_pos, NULL,
+                          col = "transparent",
+                          fill = c("#FDB813", "#D14009", "#de5d83"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#FDB813", "#D14009", "#de5d83"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_vRep_up_night.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram
+
+list <- calculate.overlap(venn_list_pos)
+
+summary(list)
+
+#core overlap
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_core.csv", row.names = TRUE)
+
+# unique up colim
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_CoUni.csv", row.names = TRUE)
+
+# unique up felim
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_FeUni.csv", row.names = TRUE)
+
+# unique up plim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_PUni.csv", row.names = TRUE)
+
+# shared up Co + Fe
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_CoFe.csv", row.names = TRUE)
+
+# shared up Co + P
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_CoP.csv", row.names = TRUE)
+
+# shared up P + Fe
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_up_vrep_night_PFe.csv", row.names = TRUE)
+
+venn <- venn.diagram(venn_list_neg, NULL,
+                          col = "transparent",
+                          fill = c("#FDB813", "#D14009", "#de5d83"),
+                          alpha = 0.50,
+                          cex = 0.8,
+                          fontfamily = "sans",
+                          fontface = "bold",
+                          cat.col = c("#FDB813", "#D14009", "#de5d83"),
+                          cat.cex = 0.8,
+                          cat.fontfamily = "sans",
+                          margin = 0.2,
+                          main.fontfamily = "sans",
+                          print.mode = c("raw","percent"), # Show both numbers and percent
+                          main.pos = c(0.5,0.9))
+
+
+
+grid.draw(venn)
+
+pdf(file = "/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/VD_vRep_night_down.pdf")
+grid.draw(prot_venn)
+dev.off()
+
+## extract the overlap analysis so you have the list of genes that are in each section of the venn diagram (no more manual analysis!!!!!!)
+list <- calculate.overlap(venn_list_neg)
+
+summary(list)
+
+#core overlap
+write.csv(list$a5,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_core.csv", row.names = TRUE)
+
+# unique down colim
+write.csv(list$a7,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_CoUni.csv", row.names = TRUE)
+
+# unique down felim
+write.csv(list$a3,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_FeUni.csv", row.names = TRUE)
+
+# unique down plim
+write.csv(list$a1,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_PUni.csv", row.names = TRUE)
+
+# sjared down Co + Fe
+write.csv(list$a6,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_CoFe.csv", row.names = TRUE)
+
+# shared down Co + P
+write.csv(list$a4,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_CoP.csv", row.names = TRUE)
+
+# shared down P + Fe
+write.csv(list$a2,"/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VD_down_vrep_night_PFe.csv", row.names = TRUE)
+
+```
