@@ -15,6 +15,10 @@ This folder includes code and relevant files for gene enrichment analysis and he
 
 2. Croco_Colim_Heatmaps.Rmd --> Annotated R Markdown file for heatmap visualizations
 
-    A. 
+    A. Heatmaps visualization
+        - Input file: CrocoColim_normcounts_forDGE.csv (see DESeq2)
+        - Input file: CrocoColim_trimmed_forDESeq2.csv (see DESeq2)
+        - Input file: Croco_kegg_annot.csv (see Croco_annotation)
+        - 
 
 
