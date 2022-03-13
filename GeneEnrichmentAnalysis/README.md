@@ -3,6 +3,7 @@ This folder includes code and relevant files for gene enrichment analysis and he
 ## Folders and Files
 
 1. Croco_Colim_clusterProfiler.Rmd --> Annotated R Markdown file for gene enrichment analyses using clusterProfiler functions enricher (for GO) and enrichKEGG (for KEGG).
+
     A. clusterProfiler analyses
       - Input file: Croco_GO_KO_database.csv (see Croco_Annotation)
       - Input file: Venn Diagram gene lists
