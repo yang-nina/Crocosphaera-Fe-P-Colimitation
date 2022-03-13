@@ -1,0 +1,2596 @@
+---
+title: "Croco_Colim_clusterProfiler"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "10/04/2021"
+updated: "3/11/2022"
+output: html_document
+---
+
+## Background
+
+This document outlines the steps taken to run a functional gene ontology (GO) term enrichment and KEGG Orthology pathway enrichment using clusterPorfiler. 
+
+## Load libraries
+
+**1. Install (if required) & upload packages into your current session**
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+
+BiocManager::install("tidyverse")
+BiocManager::install("dplyr")
+BiocManager::install("clusterProfiler")
+```
+
+**2. Upload the package into your current session**
+```{r library, eval = TRUE, message = FALSE, warning = FALSE}
+
+library(tidyverse)
+library(dplyr)
+library(clusterProfiler)
+```
+
+## GO Enrichment Analysis - clusterProfiler
+
+**clusterProfiler function enricher**
+
+```{r enricher_day_BP, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+tail(bg)
+
+bg_BP <- dplyr::filter(bg, GO.Ontology == "BP")
+head(bg_BP)
+nrow(bg_BP)
+
+go2gene <- bg_BP[, c("GO.ID", "gene_id")]
+go2name <- bg_BP[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_core_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoP_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_RepUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PCoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoPRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_night_BP, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_BP <- dplyr::filter(bg, GO.Ontology == "BP")
+head(bg_BP)
+nrow(bg_BP)
+
+go2gene <- bg_BP[, c("GO.ID", "gene_id")]
+go2name <- bg_BP[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_core_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoP_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_RepUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PCoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoPRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_night_enrich_BP.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_vrep_BP, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_BP <- dplyr::filter(bg, GO.Ontology == "BP")
+head(bg_BP)
+nrow(bg_BP)
+
+go2gene <- bg_BP[, c("GO.ID", "gene_id")]
+go2name <- bg_BP[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_day_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+### night
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_night_vrep_enrich_BP.csv", row.names = TRUE) # enricher results
+```
+
+```{r enricher_day_MF, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+dim(bg)
+
+bg1 <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/colimCroco_goterms_database_KO.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg1)
+dim(bg1)
+
+bg_MF <- dplyr::filter(bg, GO.Ontology == "MF")
+head(bg_MF)
+nrow(bg_MF)
+
+go2gene <- bg_MF[, c("GO.ID", "gene_id")]
+go2name <- bg_MF[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_core_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoP_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_RepUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PCoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoPRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_day_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_day_enrich_BP.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_night_MF, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_MF <- dplyr::filter(bg, GO.Ontology == "MF")
+head(bg_MF)
+nrow(bg_MF)
+
+go2gene <- bg_MF[, c("GO.ID", "gene_id")]
+go2name <- bg_MF[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_core_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoP_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_RepUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PCoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoPRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_night_enrich_MF.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_vrep_MF, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_MF <- dplyr::filter(bg, GO.Ontology == "MF")
+head(bg_MF)
+nrow(bg_MF)
+
+go2gene <- bg_MF[, c("GO.ID", "gene_id")]
+go2name <- bg_MF[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_day_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+### night
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_night_vrep_enrich_MF.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_day_CC, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_CC <- dplyr::filter(bg, GO.Ontology == "CC")
+head(bg_CC)
+nrow(bg_CC)
+
+go2gene <- bg_CC[, c("GO.ID", "gene_id")]
+go2name <- bg_CC[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_core_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoP_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_RepUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PCoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoPRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_day_enrich_CC.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_night_CC, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_CC <- dplyr::filter(bg, GO.Ontology == "CC")
+head(bg_CC)
+nrow(bg_CC)
+
+go2gene <- bg_CC[, c("GO.ID", "gene_id")]
+go2name <- bg_CC[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_core_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoP_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_RepUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PCoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoPRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_night_enrich_CC.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_vrep_CC, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_GO_KO_database.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+head(bg)
+
+bg_CC <- dplyr::filter(bg, GO.Ontology == "CC")
+head(bg_CC)
+nrow(bg_CC)
+
+go2gene <- bg_CC[, c("GO.ID", "gene_id")]
+go2name <- bg_CC[, c("GO.ID", "GO.Term")]
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_day_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+### night
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enricher(vd_list, TERM2GENE = go2gene, TERM2NAME = go2name)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_night_vrep_enrich_CC.csv", row.names = TRUE) # enricher results
+
+```
+
+## KEGG Enrichment Analysis - clusterProfiler
+
+**clusterProfiler function enrichKEGG**
+
+```{r enricher_day_KO, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_kegg_annot.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+colnames(bg)
+bg <- bg$KO
+head(bg)
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_core_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoP_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_RepUni_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PCoFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFe_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_CoPRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_FeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_PFeRep_day_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_day_enrich_KO.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_night_KO, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_kegg_annot.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+colnames(bg)
+bg <- bg$KO
+head(bg)
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_core_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoP_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_RepUni_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/RepUni_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PCoFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PCoFe_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFe_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFeRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_CoPRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoPRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_FeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_night_PFeRep_rna.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFeRep_night_enrich_KO.csv", row.names = TRUE) # enricher results
+
+```
+
+```{r enricher_vrep_KO, eval = TRUE, message = FALSE, warning = FALSE}
+
+bg <- read_csv("/Users/ninayang/Documents/Blast2GO/b2gFiles/Croco_kegg_annot.csv", col_names = TRUE) # this is the file that will be used for the universe or background genes
+colnames(bg)
+bg <- bg$KO
+head(bg)
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_day_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_day_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+### night
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_up_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_core.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_FeUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PUni.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoFe_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_CoP.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoP_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+vd_list <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/VD_down_vrep_night_PFe.csv")
+head(vd_list)
+vd_list <- vd_list$x
+vd_list_enrich <- enrichKEGG(gene = vd_list, organism = "ko", universe = bg, minGSSize = 5)
+vd_list_enrich
+
+write.csv(vd_list_enrich, file="/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PFe_down_night_vrep_enrich_KO.csv", row.names = TRUE) # enricher results
+
+```
+
+## Visualize Functional Enrichment
+
+**Dot Plots**
+
+```{r enricher_plot_diel, eval = TRUE, message = FALSE, warning = FALSE}
+rm(list=ls()) # removes all prior objects
+
+# load GO Terms from enricher analysis and combine data files to generate a plot
+
+## This is for day / night core overlap genes. These are genes that are up or down regulated by each treatment during the day / night. 
+
+dayBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_BP.csv", col_names = TRUE)
+head(dayBP) # total #enriched terms
+diel <- rep("day", nrow(dayBP)) # create a vector with the length of "BP" with day filled in
+head(diel)
+dayBP.GO <- cbind(dayBP, diel)
+head(dayBP.GO)
+go.fxn <- rep("BP", nrow(dayBP.GO))
+dayBP.GO <- cbind(dayBP.GO, go.fxn)
+head(dayBP.GO)
+
+nightBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_BP.csv", col_names = TRUE)
+head(nightBP) # total #enriched terms
+diel <- rep("night", nrow(nightBP)) # create a vector with the length of "BP" with day filled in
+head(diel)
+nightBP.GO <- cbind(nightBP, diel)
+head(nightBP.GO)
+go.fxn <- rep("BP", nrow(nightBP.GO))
+nightBP.GO <- cbind(nightBP.GO, go.fxn)
+head(nightBP.GO)
+
+dayMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_MF.csv", col_names = TRUE)
+head(dayMF) # total #enriched terms
+diel <- rep("day", nrow(dayMF)) # create a vector with the length of "MF" with day filled in
+head(diel)
+dayMF.GO <- cbind(dayMF, diel)
+head(dayMF.GO)
+go.fxn <- rep("MF", nrow(dayMF.GO))
+dayMF.GO <- cbind(dayMF.GO, go.fxn)
+head(dayMF.GO)
+
+nightMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_MF.csv", col_names = TRUE)
+head(nightMF) # total #enriched terms
+diel <- rep("night", nrow(nightMF)) # create a vector with the length of "MF" with day filled in
+head(diel)
+nightMF.GO <- cbind(nightMF, diel)
+head(nightMF.GO)
+go.fxn <- rep("MF", nrow(nightMF.GO))
+nightMF.GO <- cbind(nightMF.GO, go.fxn)
+head(nightMF.GO)
+
+dayCC <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_CC.csv", col_names = TRUE)
+head(dayCC) # total #enriched terms
+diel <- rep("day", nrow(dayCC)) # create a vector with the length of "MF" with day filled in
+head(diel)
+dayCC <- cbind(dayCC, diel)
+head(dayCC)
+go.fxn <- rep("CC", nrow(dayCC))
+dayCC <- cbind(dayCC, go.fxn)
+head(dayCC)
+
+nightCC <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_CC.csv", col_names = TRUE)
+head(nightCC) # total #enriched terms
+diel <- rep("night", nrow(nightCC)) # create a vector with the length of "MF" with night filled in
+head(diel)
+nightCC <- cbind(nightCC, diel)
+head(nightCC)
+go.fxn <- rep("CC", nrow(nightCC))
+nightCC <- cbind(nightCC, go.fxn)
+head(nightCC)
+
+dayKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_day_enrich_KO.csv", col_names = TRUE)
+head(dayKO) # total #enriched terms
+diel <- rep("day", nrow(dayKO)) # create a vector with the length of "MF" with day filled in
+head(diel)
+dayKO <- cbind(dayKO, diel)
+head(dayKO)
+go.fxn <- rep("KO", nrow(dayKO))
+dayKO <- cbind(dayKO, go.fxn)
+head(dayKO)
+
+nightKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/core_night_enrich_KO.csv", col_names = TRUE)
+head(nightKO) # total #enriched terms
+diel <- rep("night", nrow(nightKO)) # create a vector with the length of "MF" with night filled in
+head(diel)
+nightKO <- cbind(nightKO, diel)
+head(nightKO)
+go.fxn <- rep("KO", nrow(nightKO))
+nightKO <- cbind(nightKO, go.fxn)
+head(nightKO)
+
+dielcore_GO <- rbind(dayBP.GO, nightBP.GO, dayMF.GO, nightMF.GO, dayCC, nightCC, dayKO, nightKO)  # combine day and night into one dataframe "diel" for plotting
+dim(dielcore_GO)
+head(dielcore_GO)
+tail(dielcore_GO)
+
+# keep dielcore_GO as is to make supplementary table
+dielcoreGO_plot = dplyr::filter(dielcore_GO, go.fxn != "CC") #note: CC wasn't in the figure, but we will need this for later
+dim(dielcoreGO_plot) # this is for plotting with CC removed
+dielcoreGO_plot
+
+dielcoreGO_plot$GO.description <- paste(dielcoreGO_plot$Description, dielcoreGO_plot$ID, sep=' | ')  # generate new column with concatenated GO description and term
+head(dielcoreGO_plot)  
+tail(dielcoreGO_plot)  
+dim(dielcoreGO_plot)
+
+dielcoreGO_plot$GO.description = forcats::fct_rev(factor(dielcoreGO_plot$GO.description)) #arrange terms in alphabetical order
+f <- factor(c("BP", "BP", "BP", "BP", "BP", "BP", "BP", "MF", "MF", "MF", "MF", "MF", "MF", "KO", "KO", "KO"), levels = c("BP", "MF", "KO"))
+fct_relevel(f)
+fct_relevel(f, "KO", after = Inf)
+
+dielcoreGO_plot$go.fxn = fct_relevel(f, "KO", after = Inf) #arrange terms in alphabetical order
+dielcoreGO_plot$go.fxn
+
+plot <- ggplot(dielcoreGO_plot, aes(diel, GO.description, color = p.adjust)) + 
+  geom_point(aes(size = Count)) + facet_grid(rows = vars(go.fxn), scales = "free") + scale_color_gradient(low = "#810f7c", high = "#9ebcda") 
+
+plot
+
+plot <- plot + xlab("") + 
+  theme(panel.grid.major = element_line(colour = "lightgrey"), axis.text.y = element_text(colour = "black", size = 7),
+        axis.text.x = element_text(colour = "black", size = 7, angle = 45, vjust = 1, hjust = 1),
+        axis.title.y = element_blank(),
+        axis.title.x = element_text(face = "bold", size = 7),
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 0.7), 
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 7, face = "bold"),
+        strip.text.y = element_text(size = 7, color = "black", face = "bold"),
+        strip.text.x = element_text(size = 7, color = "black", face = "bold"),
+        strip.background.y = element_rect(color = "black", fill = "#ededed", size = 0.5, linetype = "solid"), 
+        strip.background.x = element_rect(color = "white", fill = "white", size = 0.5, linetype = "solid"))
+
+plot
+
+ggsave("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/enrich_outputs/plot_enrich_core_diel_GO_KO.pdf", height = 12, width = 10, units = "cm", dpi=300)
+
+```
+
+```{r enricher_plot_vRep, eval = TRUE, message = FALSE, warning = FALSE}
+## These are genes that are relative to replete. We will be analyzing the "unique" genes or the segment that represents the genes that are up or downregulated during the day and night compared to replete. 
+
+## This is for BP or Biological Process
+# unique segments for genes that are upregulated during the day and night
+
+CoBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_BP.csv", col_names = TRUE)
+head(CoBP) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+CoBP.GO <- cbind(CoBP, treatment)
+head(CoBP.GO)
+
+FeBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_BP.csv", col_names = TRUE)
+head(FeBP) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+FeBP.GO <- cbind(FeBP, treatment)
+head(FeBP.GO)
+
+PBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_BP.csv", col_names = TRUE)
+head(PBP) # total #enriched terms
+treatment <- rep("P-lim", nrow(PBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+PBP.GO <- cbind(PBP, treatment)
+head(PBP.GO)
+
+CoFeP.vrep <- rbind(CoBP.GO, FeBP.GO, PBP.GO) # this is a dataframe of all the unique segements
+head(CoFeP.vrep)
+diel <- rep("day", nrow(CoFeP.vrep))
+CoFeP.vrepDay.GO <- cbind(CoFeP.vrep, diel) # this is a datagram that includes diel column
+head(CoFeP.vrepDay.GO)
+
+# unique segments for genes that are upregulated during the night
+
+CoBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_BP.csv", col_names = TRUE)
+head(CoBP) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+CoBP.GO <- cbind(CoBP, treatment)
+head(CoBP.GO)
+
+FeBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_BP.csv", col_names = TRUE)
+head(FeBP) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+FeBP.GO <- cbind(FeBP, treatment)
+head(FeBP.GO)
+
+PBP <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_BP.csv", col_names = TRUE)
+head(PBP) # total #enriched terms
+treatment <- rep("P-lim", nrow(PBP)) # create a vector with the length of "BP" with day filled in
+head(treatment)
+PBP.GO <- cbind(PBP, treatment)
+head(PBP.GO)
+
+CoFeP.vrep <- rbind(CoBP.GO, FeBP.GO, PBP.GO)
+head(CoFeP.vrep)
+diel <- rep("night", nrow(CoFeP.vrep))
+CoFeP.vrepNight.GO <- cbind(CoFeP.vrep, diel)
+head(CoFeP.vrepNight.GO)
+
+CoFeP.vrep.GO <- rbind(CoFeP.vrepDay.GO, CoFeP.vrepNight.GO)
+head(CoFeP.vrep.GO)
+reg <- rep("up", nrow(CoFeP.vrep.GO))
+CoFeP.vrepUp.GO <- cbind(CoFeP.vrep.GO, reg)
+head(CoFeP.vrepUp.GO)
+go.fxn <- rep("BP", nrow(CoFeP.vrepUp.GO))
+
+CoFeP.vRep.BP.GO <- cbind(CoFeP.vrepUp.GO, go.fxn)
+head(CoFeP.vRep.BP.GO) # this is the final dataframe for vReplete, day, night, up, for biological process. 
+dim(CoFeP.vRep.BP.GO)
+
+## This is for MF or Molecular Function
+# unique segments for genes that are upregulated during the day and night
+
+CoMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_MF.csv", col_names = TRUE)
+head(CoMF) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+CoMF.GO <- cbind(CoMF, treatment)
+head(CoMF.GO)
+
+FeMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_MF.csv", col_names = TRUE)
+head(FeMF) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+FeMF.GO <- cbind(FeMF, treatment)
+head(FeMF.GO)
+
+PMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_MF.csv", col_names = TRUE)
+head(PMF) # total #enriched terms
+treatment <- rep("P-lim", nrow(PMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+PMF.GO <- cbind(PMF, treatment)
+head(PMF.GO)
+
+CoFeP.vrep <- rbind(CoMF.GO, FeMF.GO, PMF.GO) # this is a dataframe of all the unique segements
+head(CoFeP.vrep)
+diel <- rep("day", nrow(CoFeP.vrep))
+CoFeP.vrepDay.GO <- cbind(CoFeP.vrep, diel) # this is a datagram that includes diel column
+head(CoFeP.vrepDay.GO)
+
+# unique segments for genes that are downregulated during the night
+
+CoMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_MF.csv", col_names = TRUE)
+head(CoMF) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+CoMF.GO <- cbind(CoMF, treatment)
+head(CoMF.GO)
+
+FeMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_MF.csv", col_names = TRUE)
+head(FeMF) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+FeMF.GO <- cbind(FeMF, treatment)
+head(FeMF.GO)
+
+PMF <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_MF.csv", col_names = TRUE)
+head(PMF) # total #enriched terms
+treatment <- rep("P-lim", nrow(PMF)) # create a vector with the length of "MF" with day filled in
+head(treatment)
+PMF.GO <- cbind(PMF, treatment)
+head(PMF.GO)
+
+CoFeP.vrep <- rbind(CoMF.GO, FeMF.GO, PMF.GO)
+head(CoFeP.vrep)
+diel <- rep("night", nrow(CoFeP.vrep))
+CoFeP.vrepNight.GO <- cbind(CoFeP.vrep, diel)
+head(CoFeP.vrepNight.GO)
+
+CoFeP.vrep.GO <- rbind(CoFeP.vrepDay.GO, CoFeP.vrepNight.GO)
+head(CoFeP.vrep.GO)
+reg <- rep("up", nrow(CoFeP.vrep.GO))
+CoFeP.vrepUp.GO <- cbind(CoFeP.vrep.GO, reg)
+head(CoFeP.vrepUp.GO)
+go.fxn <- rep("MF", nrow(CoFeP.vrepUp.GO))
+
+CoFeP.vRep.MF.GO <- cbind(CoFeP.vrepUp.GO, go.fxn)
+head(CoFeP.vRep.MF.GO) # this is the final dataframe for vReplete, day, night, up, for molecular function. 
+dim(CoFeP.vRep.MF.GO)
+CoFeP.vRep.MF.GO
+
+type <- rep("unique", nrow(CoFeP.vRep.BP.GO))
+CoFeP.vRep.BP.GO <- cbind(CoFeP.vRep.BP.GO, type)
+head(CoFeP.vRep.BP.GO)
+
+type <- rep("unique", nrow(CoFeP.vRep.MF.GO))
+CoFeP.vRep.MF.GO <- cbind(CoFeP.vRep.MF.GO, type)
+head(CoFeP.vRep.MF.GO)
+
+### This is for KEGG Pathways
+
+# unique segments for genes that are upregulated during the day and night
+
+CoKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_day_vrep_enrich_KO.csv", col_names = TRUE)
+head(CoKO) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+CoKO.GO <- cbind(CoKO, treatment)
+head(CoKO.GO)
+
+FeKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_day_vrep_enrich_KO.csv", col_names = TRUE)
+head(FeKO) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+FeKO.GO <- cbind(FeKO, treatment)
+head(FeKO.GO)
+
+PKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_day_vrep_enrich_KO.csv", col_names = TRUE)
+head(PKO) # total #enriched terms
+treatment <- rep("P-lim", nrow(PKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+PKO.GO <- cbind(PKO, treatment)
+head(PKO.GO)
+
+CoFeP.vrep <- rbind(CoKO.GO, FeKO.GO, PKO.GO) # this is a dataframe of all the unique segements
+head(CoFeP.vrep)
+diel <- rep("day", nrow(CoFeP.vrep))
+CoFeP.vrepDay.GO <- cbind(CoFeP.vrep, diel) # this is a datagram that includes diel column
+head(CoFeP.vrepDay.GO)
+
+# unique segments for genes that are upregulated during the night
+
+CoKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/CoUni_night_vrep_enrich_KO.csv", col_names = TRUE)
+head(CoKO) # total #enriched terms
+treatment <- rep("Co-lim", nrow(CoKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+CoKO.GO <- cbind(CoKO, treatment)
+head(CoKO.GO)
+
+FeKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/FeUni_night_vrep_enrich_KO.csv", col_names = TRUE)
+head(FeKO) # total #enriched terms
+treatment <- rep("Fe-lim", nrow(FeKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+FeKO.GO <- cbind(FeKO, treatment)
+head(FeKO.GO)
+
+PKO <- read_csv("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/Code_check/PUni_night_vrep_enrich_KO.csv", col_names = TRUE)
+head(PKO) # total #enriched terms
+treatment <- rep("P-lim", nrow(PKO)) # create a vector with the length of "KO" with day filled in
+head(treatment)
+PKO.GO <- cbind(PKO, treatment)
+head(PKO.GO)
+
+CoFeP.vrep <- rbind(CoKO.GO, FeKO.GO, PKO.GO)
+head(CoFeP.vrep)
+diel <- rep("night", nrow(CoFeP.vrep))
+CoFeP.vrepNight.GO <- cbind(CoFeP.vrep, diel)
+head(CoFeP.vrepNight.GO)
+
+CoFeP.vrep.GO <- rbind(CoFeP.vrepDay.GO, CoFeP.vrepNight.GO)
+head(CoFeP.vrep.GO)
+reg <- rep("up", nrow(CoFeP.vrep.GO))
+CoFeP.vrepUp.GO <- cbind(CoFeP.vrep.GO, reg)
+head(CoFeP.vrepUp.GO)
+go.fxn <- rep("KO", nrow(CoFeP.vrepUp.GO))
+CoFeP.vRep.KO.GO <- cbind(CoFeP.vrepUp.GO, go.fxn)
+head(CoFeP.vRep.KO.GO) # this is the final dataframe for vReplete, day, night, up, for biological process. 
+dim(CoFeP.vRep.KO.GO)
+
+type <- rep("unique", nrow(CoFeP.vRep.KO.GO))
+CoFeP.vRep.KO.GO <- cbind(CoFeP.vRep.KO.GO, type)
+head(CoFeP.vRep.KO.GO)
+
+#### this is for the completed dataframe
+
+colnames(CoFeP.vRep.BP.GO)
+colnames(CoFeP.vRep.MF.GO)
+colnames(CoFeP.vRep.KO.GO)
+
+CoFeP.vRep.BP.MF.GO <- rbind(CoFeP.vRep.BP.GO, CoFeP.vRep.MF.GO, CoFeP.vRep.KO.GO)
+head(CoFeP.vRep.BP.MF.GO)
+dim(CoFeP.vRep.BP.MF.GO)
+tail(CoFeP.vRep.BP.MF.GO)
+
+CoFeP.vRep.BP.MF.GO$GO.description <- paste(CoFeP.vRep.BP.MF.GO$Description, CoFeP.vRep.BP.MF.GO$ID, sep=' | ') # generate new column with concatenated GO IDs
+head(CoFeP.vRep.BP.MF.GO)
+tail(CoFeP.vRep.BP.MF.GO)
+
+CoFeP.vRep.BP.MF.GO
+
+CoFeP.vRep.BP.MF.GO$GO.description = forcats::fct_rev(factor(CoFeP.vRep.BP.MF.GO$GO.description)) #arrange terms in alphabetical order
+f <- factor(c("BP", "BP", "BP", "BP", "BP", "MF", "MF", "KO", "KO"), levels = c("BP", "MF", "KO"))
+fct_relevel(f)
+fct_relevel(f, "KO", after = Inf)
+
+CoFeP.vRep.BP.MF.GO$go.fxn = fct_relevel(f, "KO", after = Inf) #arrange terms in alphabetical order
+CoFeP.vRep.BP.MF.GO$go.fxn
+
+head(CoFeP.vRep.BP.MF.GO)
+
+# need to add Fe-lim day
+# need to add Co-lim night
+
+line <- dplyr::filter(CoFeP.vRep.BP.MF.GO, Description == "cell division")
+line
+line[1, 10] <- NA
+line[1, 12] <- "night"
+line
+line2 <- line
+line2[1, 11] <- "Fe-lim"
+line2
+line2[1, 12] <- "day"
+line2
+
+line <- rbind(line, line2)
+line
+
+reg_df <- rbind(CoFeP.vRep.BP.MF.GO, line)
+
+reg_df
+
+plot <- ggplot(CoFeP.vRep.BP.MF.GO, aes(treatment, GO.description, color = p.adjust)) + 
+  geom_point(aes(size = Count)) + facet_grid(go.fxn ~ diel, scales = "free") + scale_color_gradient(low = "#810f7c", high = "#9ebcda")
+
+plot
+
+plot <- plot + labs(x = expression(paste("GO Enrichment (vReplete)"))) +
+  theme(panel.grid.major = element_line(colour = "lightgrey"), axis.text.y = element_text(colour = "black", size = 5),
+        axis.text.x = element_text(colour = "black", size = 7, angle = 45, vjust = 1, hjust = 1),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 0.7), 
+        legend.title = element_blank(),
+        legend.position = "bottom", 
+        legend.text = element_text(colour = "black", size = 5, face = "bold"),
+        strip.text.y = element_text(size = 5, color = "black", face = "bold"),
+        strip.text.x = element_text(size = 5, color = "black", face = "bold"),
+        strip.background.y = element_rect(color = "black", fill = "#ededed", size = 0.5, linetype = "solid"), 
+        strip.background.x = element_rect(color = "white", fill = "white", size = 0.5, linetype = "solid"))
+
+plot
+
+ggsave("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/RNAseq/VennDiagrams/plot_enrich_CoFePUni_vRep_GO_KO.pdf", height = 11, width = 9, units = "cm", dpi=300)
+
+```
