@@ -281,8 +281,9 @@ head(df)
 # split the dataset by KOs that are "none" and everything else
 none_df = dplyr::filter(df, KO == "none")
 head(none_df)
+tail(none_df)
 dim(none_df)
-ids <- none_df$gene_id # replace "none" with the gene_id
+ids <- none_df$id # replace "none" with the id
 head(ids)
 none_df <- cbind(none_df, ids)
 head(none_df)
@@ -301,13 +302,13 @@ dim(KO_df)
 IDs_KO_df <- KO_df %>% group_by(KO) %>% 
   mutate(GO_IDs = paste(GO_IDs, collapse = ";")) %>% distinct(KO, .keep_all = TRUE) # this gets unique KOs and merges GO_IDs
 
-dim(IDs_KO_df) # 1759 x 4
+dim(IDs_KO_df) # 1759 x 6
 head(IDs_KO_df)
 
 terms_KO_df <- KO_df %>% group_by(KO) %>% 
   mutate(GO_terms = paste(GO_terms, collapse = ";")) %>% distinct(KO, .keep_all = TRUE) # this gets unique KOs and merges terms
 
-dim(terms_KO_df) # 1759 x 4
+dim(terms_KO_df) # 1759 x 6
 head(terms_KO_df)
 
 IDs_terms <- dplyr::setdiff(IDs_KO_df$KO, terms_KO_df$KO)
@@ -318,7 +319,7 @@ nrow(IDs_terms) # this should be null (none because the list should be identical
 head(IDs_KO_df)
 head(terms_KO_df)
 
-IDs <- dplyr::select(IDs_KO_df, 1, 2, 6)
+IDs <- dplyr::select(IDs_KO_df, 1, 2, 4, 6)
 head(IDs)
 dim(IDs)
 terms <- dplyr::select(terms_KO_df, 1, 3)
@@ -327,21 +328,31 @@ dim(terms)
 
 kegg_annot <- left_join(IDs, terms, by = "KO") 
 head(kegg_annot)
-kegg_annot <- dplyr::select(kegg_annot, -c(4)) # remove duplicate id column
+tail(kegg_annot)
+kegg_annot <- dplyr::select(kegg_annot, -c(5)) # remove duplicate id column
 names(kegg_annot)[1] <- "gene_id"
+names(kegg_annot)[3] <- "KO_id"
+names(kegg_annot)[4] <- "KO_acc"
 head(kegg_annot)
-kegg_annot <- kegg_annot[, c(1, 2, 4, 3)] # reorder columns
+tail(kegg_annot)
+kegg_annot <- kegg_annot[, c(1, 3, 4, 2, 5)] # reorder columns
 head(kegg_annot)
 dim(kegg_annot)
 
 # now we have to combine the merged KOs and GO terms with the genes that do not have KO annotation
 head(none_df)
 colnames(none_df)[1] <- "gene_id" # rename column 1 to gene_id
+colnames(none_df)[4] <- "KO_acc" # rename column 1 to gene_id
+KO_id = none_df$gene_id
+none_df <- cbind(none_df, KO_id)
+head(none_df)
+none_df <- none_df[, c(1, 5, 4, 2, 3)] # reorder columns
+head(none_df)
 head(kegg_annot)
 final_KO_annot <- rbind(kegg_annot, none_df)
 head(final_KO_annot)
 tail(final_KO_annot)
-dim(final_KO_annot) # final annotation worksheet for Crocosphaera files where duplicated KOs are merged; also the "nones" are replaced with blastx accession ids
+dim(final_KO_annot) # final annotation worksheet for Crocosphaera files where duplicated KOs are merged; also the "nones" are replaced with blastx accession ids 1880 x 5 dim
 
 # need to remove duplicate GO terms after merging rows based on KOs
 final_KO_annot$GO_IDs <- sapply(final_KO_annot$GO_IDs, function(x) paste(unique(unlist(str_split(x,";"))), collapse = ";"))
@@ -352,12 +363,26 @@ dim(final_KO_annot)
 
 splitted <- strsplit(as.character(final_KO_annot$GO_IDs), ";") # split into multiple GO ids
 head(splitted)
-df_split <- data.frame(v1 = rep.int(final_KO_annot$KO, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+
+df_split <- data.frame(v1 = rep.int(final_KO_annot$KO_id, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+df_split2 <- data.frame(v1 = rep.int(final_KO_annot$KO_acc, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
 head(df_split, 10)
 tail(df_split, 10)
 dim(df_split)
+head(df_split2, 10)
+tail(df_split2)
+dim(df_split2)
+
 colnames(df_split) <- c("gene_id", "GO.ID") # rename columns
+colnames(df_split2) <- c("KO", "GO.ID")
 head(df_split) # check colnames
+head(df_split2)
+bind <- cbind(df_split, df_split2)
+head(bind)
+dim(bind)
+bind_df <- bind[1:3]
+head(bind_df)
+tail(bind_df)
 
 # I need to annotate GO IDs with GO Terms in the df_split output. I tried splitting the GO.ID and GO.Term separately and then recombining them but realized the dimensions of the files were different. Part of the reason is that different databases may have annotated some of the GO Terms differently so removing duplicates did not work. For example,ATPase activity and ATP hydrolysis activity are technically the same. Thus, I am doing a 1:1 comparison of GO.ID and GO.Term against the GO.db.
 
@@ -369,6 +394,7 @@ write.csv(df, file="goterms.csv", row.names = TRUE) # write as a csv
 write.csv(df_ont, file="ontology.csv", row.names = TRUE) # write as a csv
 go <- read_csv("goterms.csv", col_names = TRUE) # read the csv back into R to manipulate (I realize this could be a roundabout way to get the formatting correct but it worked!)
 ont <- read_csv("ontology.csv", col_names = TRUE)
+head(go)
 colnames(go) <- c("GO.ID", "GO.Term") # rename col names
 head(go)
 dim(go)
@@ -376,15 +402,20 @@ colnames(ont) <- c("GO.ID", "GO.Ontology") # rename col names
 head(ont)
 dim(ont)
 
-head(df_split) # check col names of the split annotation dataframe
+# head(df_split) # check col names of the split annotation dataframe
+head(bind_df)
+tail(bind_df)
 
-universe <- left_join(df_split, go, by="GO.ID") # join the two dataframes using GO.ID, left join includes all rows in df_split in this case
+universe <- left_join(bind_df, go, by="GO.ID") # join the two dataframes using GO.ID, left join includes all rows in df_split in this case
 head(universe)
 universe <- left_join(universe, ont, by = "GO.ID") # join dataframe with ontology
 head(universe)
 tail(universe)
 dim(universe) # should be 6116
+universe <- universe[, c(1, 3, 2, 4, 5)] # reorder columns 
 
-write.csv(universe, file="Croco_GO_KO_database.csv", row.names = TRUE) # will serve as universe for enricher analysis
+## this file includes gene_id which is the unique gene identifier. this is necessary to do gene enrichment. The KO which includes KOs and then accession #s for non-KO annotated genes is necessary for heatmap visualizations.
+
+write.csv(universe, file="Croco_GO_KO_database.csv", row.names = TRUE) # will serve as universe for heatmap visualizations
 
 ```
