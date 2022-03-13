@@ -1,4 +1,4 @@
-This folder includes files for gene enrichment analysis and heatmap, dot plot, and box plot visualizations.
+This folder includes code and relevant files for gene enrichment analysis and heatmap, dot plot, and box plot visualizations.
 
 ## Folders and Files
 
@@ -9,5 +9,8 @@ This folder includes files for gene enrichment analysis and heatmap, dot plot, a
       - Output files: enricher / enrichKEGG results
 
     B. Dot Plot visualization
+      - Input files: clusterProfiler outputs 
+      - Output file: dot plot visualization of enriched "core gene" results for Gene Ontology (BP & MF terms only), and KEGG Pathways (KO).
+
     C. Summary tables of all enriched results for Supplementary Tables
 
