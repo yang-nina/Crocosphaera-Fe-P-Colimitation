@@ -19,6 +19,10 @@ This folder includes code and relevant files for gene enrichment analysis and he
         - Input file: CrocoColim_normcounts_forDGE.csv (see DESeq2)
         - Input file: CrocoColim_trimmed_forDESeq2.csv (see DESeq2)
         - Input file: Croco_kegg_annot.csv (see Croco_annotation)
-        - 
+        - Outputs: Heatmap visualizations for core genes (day - photosynthesis and night - ribosome)
+
+    B. Boxplot visualization for Fe and P stress biomarkers
+        - Input file: boxplot_stressors_rna.csv
+        - Output file: Boxplot visualization (this was further editted for clarity in Affinity Designer)
 
 
