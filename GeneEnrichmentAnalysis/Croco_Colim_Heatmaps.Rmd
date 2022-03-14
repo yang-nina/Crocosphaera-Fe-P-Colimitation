@@ -1,0 +1,344 @@
+---
+title: "Croco_Colim_Heatmaps"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "10/04/2021"
+updated: "3/11/2022"
+output: html_document
+---
+
+## Load libraries
+
+**1. Install (if required) & upload packages into your current session**
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+
+BiocManager::install("ComplexHeatmap")
+BiocManager::install("circlize")
+BiocManager::install("RColorBrewer")
+BiocManager::install("WGCNA")
+```
+
+**2. Upload the package into your current session**
+```{r library, eval = TRUE, message = FALSE, warning = FALSE}
+
+library(ComplexHeatmap)
+library(circlize)
+library(RColorBrewer)
+library(WGCNA)
+
+```
+
+**Heat Maps Diel**
+
+```{r heatmaps_diel, eval = TRUE, message = FALSE, warning = FALSE}
+
+rm(list=ls()) # removes all prior objects
+
+# let's create a dataframe that has all the gene ids and the mean gene count for each treatment
+colimData = read_csv("CrocoColim_normcounts_forDGE.csv") # this is the DESeq2-normalized dataframe 
+head(colimData)
+summary(colimData)
+dim(colimData)
+
+# let's upload the dataframe that was used for normalization because it has the proper gene_ids
+df <- read_csv("CrocoColim_trimmed_forDESeq2.csv")
+colnames(df);
+head(df)
+tail(df)
+dim(df)
+gene_id <- df[, 1:2] # extract the first two columns (the numbering and the gene_id)
+nrow(gene_id) # should have 3770 
+head(gene_id)
+
+# let's create an annotation file with gene_id and gene name to use in the visualization. First we upload the kegg annotation file. 
+kegg <- read_csv("Croco_kegg_annot.csv", col_names = TRUE) # read in KEGG annotation (this is based on prodigal gene calling from KOfamsScan)
+head(kegg)
+tail(kegg)
+dim(kegg) # the gene_id column is what we need. It has each gene annotated with either a KEGG id, an accession # from diamond blastx or a numeric gene identifier.
+
+# id is the numeric gene identifier
+# gene_id is the gene identifier for KO annotation, diamond blastx accessions, and numeric gene identifier
+# we need the KO column to be the gene_id column with none replaced by ids
+
+ko_n <- filter(kegg, KO == "none")
+head(ko_n)
+tail(ko_n)
+ko_n$KO = ko_n$id
+head(ko_n)
+dim(ko_n)
+
+ko <- filter(kegg, KO != "none")
+head(ko)
+tail(ko)
+ko_dd <- distinct(ko, gene_id,.keep_all = TRUE)
+dim(ko_dd)
+head(ko_dd)
+# combine into an updated kegg dataframe
+kegg_df <- rbind(ko_n, ko_dd)
+head(kegg_df)
+tail(kegg_df)
+dim(kegg_df)
+
+# let's create  a column for KO_df that can be used as the row names for heat maps
+kegg_df$gene.annot <- paste(kegg_df$gene_name, kegg_df$gene_id, sep=' | ') # generate new column with concatenated GO IDs
+kegg_df$gene.annot
+head(kegg_df)
+tail(kegg_df)
+
+colnames(kegg_df)[2] <- "KO_acc"
+colnames(kegg_df)[4] <- "gene_id" # this includes KO and numeric id
+head(kegg_df)
+
+# let's combine the previous two dataframe into a dataframe that has the proper gene_id and the mean gene count per treatment
+genes.GO <- left_join(gene_id, colimData, by = "...1")
+genes.GO <- dplyr::select(genes.GO, gene_id:ReN3) # extract relevant columns
+head(genes.GO)
+
+# calculate the mean gene count across each treatment
+mean.CoD <- as.numeric(rowMeans(genes.GO[, 2:4]))
+mean.CoN <- as.numeric(rowMeans(genes.GO[, 5:7]))
+mean.FeD <- as.numeric(rowMeans(genes.GO[, 8:10]))
+mean.FeN <- as.numeric(rowMeans(genes.GO[, 11:13]))
+mean.PD <- as.numeric(rowMeans(genes.GO[, 14:16]))
+mean.PN <- as.numeric(rowMeans(genes.GO[, 17:19]))
+mean.ReD <- as.numeric(rowMeans(genes.GO[, 20:22]))
+mean.ReN <- as.numeric(rowMeans(genes.GO[, 23:25]))
+
+# build a dataframe with gene_id and the rowMeans results
+Colim_df <- as.data.frame(cbind(mean.CoD, mean.CoN, mean.FeD, mean.FeN, mean.PD, mean.PN, mean.ReD, mean.ReN))
+head(Colim_df)
+Colim_df <- cbind(gene_id, Colim_df) # add on the gene_id
+head(Colim_df)
+has_rownames(Colim_df)
+Colim_df <- dplyr::select(Colim_df, gene_id:mean.ReN) # remove extra counts column
+head(Colim_df)
+tail(Colim_df)
+
+head(kegg_df) # I want gene.annot, and I want to use the gene_id
+tail(kegg_df)
+
+Colim_KO <- left_join(kegg_df, Colim_df, by = "gene_id")
+head(Colim_KO)
+tail(Colim_KO)
+dim(Colim_KO)
+
+# extract the list of differentially expressed genes that we are interesting in visualizing in a heatmap
+# I am interested in all the "core" genes for the day / night analysis to see whether different treatments respond differently for these key functions and this should come from the data table generated through enricher
+
+# load the enricher output for day, BP
+
+dayBP <- read_csv("core_day_enrich_BP.csv", col_names = TRUE)
+
+head(dayBP)
+
+splitted <- strsplit(as.character(dayBP$geneID), "/") # split into multiple GO ids
+head(splitted)
+GO.genes <- data.frame(v1 = rep.int(dayBP$Description, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+head(GO.genes)
+tail(GO.genes)
+dim(GO.genes)
+colnames(GO.genes) <- c("GO.term", "gene_id")
+head(GO.genes)
+tail(GO.genes)
+
+GO.genes <- left_join(GO.genes, Colim_KO, by = "gene_id")
+dim(GO.genes)
+head(GO.genes)
+
+PS.GO.dayBP <- dplyr::filter(GO.genes, GO.term == "photosynthesis")
+head(PS.GO.dayBP)
+dim(PS.GO.dayBP)
+
+htmap.PS_df <- dplyr::select(PS.GO.dayBP, mean.CoD:mean.ReN, gene.annot)
+
+htmap.PS_df <- column_to_rownames(htmap.PS_df, var = "gene.annot") # set rownames as gene_id
+head(htmap.PS_df)
+
+matrix.PS <- as.matrix(htmap.PS_df)
+summary(matrix.PS)
+
+
+# scale matrix
+cal_z_score <- function(x){
+  (x - mean(x)) / sd(x)
+}
+
+# normalize matrix
+
+matrix.PS_norm <- t(apply(matrix.PS, 1, cal_z_score))
+
+my_sample_col <- data.frame(Nutrient = rep(c("Colim", "Colim", 
+                                         "Felim", "Felim", 
+                                         "Plim", "Plim",
+                                         "Replete", "Replete")))
+
+my_sample_col2 <- data.frame(Diel = rep(c("Day", "Night", 
+                                          "Day", "Night",
+                                          "Day", "Night",
+                                          "Day", "Night")))
+
+
+my_sample_col_final <- cbind(my_sample_col, my_sample_col2)
+
+ann_colors = list( 
+  Diel = c(Day = "#FDB813", Night = "#32174D"),
+  Nutrient = c(Colim = "#00A087FF", Felim = "#3C5488FF", Plim = "#4DBBD5FF", Replete = "#F39B7FFF"))
+
+
+h1 <- Heatmap(matrix.PS_norm, col = blueWhiteRed(50, 0.75), row_names_gp = gpar(fontsize = 5), row_km = 3, row_km_repeats = 100,
+              heatmap_legend_param = list(title = "Z-score", direction = "horizontal", 
+                                          title_gp = gpar(fontsize = 5, fontface = "bold"),
+                                          labels_gp = gpar(fontsize = 5), legend_width = unit(20, "mm"),
+                                          legend_height = unit(1, "mm")),
+              rect_gp = gpar(col = "black", lwd = 0.5), width = unit(2, "cm"), height = unit(6, "cm"),
+              column_split = 4, row_title_gp = gpar(fontsize = 5, fontface = "bold"), 
+              show_heatmap_legend = TRUE, column_title = "Photosynthesis (GO:0015979)",
+              column_title_gp = gpar(fontsize = 7, fontface = "bold"), show_column_names = FALSE, 
+              top_annotation = HeatmapAnnotation(df = my_sample_col_final, col = ann_colors, show_annotation_name = TRUE,
+                                                 annotation_name_gp= gpar(fontsize = 5), gp = gpar(col = "black", lwd = 0.5),
+                                                 annotation_legend_param = list(title_gp = gpar(fontsize = 5, fontface = "bold"), 
+                                                                                labels_gp = gpar(fontsize = 5),
+                                                                                grid_width = unit(2, "mm"),
+                                                                                grid_height = unit(3, "mm")),
+                                                 simple_anno_size = unit(0.3, "cm"),
+                                                 show_legend = c(TRUE, TRUE))) 
+              
+h1
+
+draw(h1, annotation_legend_side = "left", heatmap_legend_side = "bottom")
+
+
+pdf("htmap_enrich_GO_photosynthesis.pdf",
+    width = 8, height = 12, # Width and height in inches
+    bg = "white"          # Background color
+) 
+draw(h1, annotation_legend_side = "left", heatmap_legend_side = "bottom")
+dev.off()
+
+
+nightBP <- read_csv("core_night_enrich_BP.csv", col_names = TRUE)
+head(nightBP)
+
+splitted <- strsplit(as.character(nightBP$geneID), "/") # split into multiple GO ids
+head(splitted)
+GO.genes <- data.frame(v1 = rep.int(nightBP$Description, sapply(splitted, length)), v2 = unlist(splitted)) # list all genes with each of their GO terms in a single row
+head(GO.genes)
+tail(GO.genes)
+dim(GO.genes)
+colnames(GO.genes) <- c("GO.term", "gene_id")
+head(GO.genes)
+tail(GO.genes)
+
+GO.genes <- left_join(GO.genes, Colim_KO, by = "gene_id")
+dim(GO.genes)
+head(GO.genes)
+
+ribo.GO.nightBP <- dplyr::filter(GO.genes, GO.term == "translation")
+head(ribo.GO.nightBP)
+dim(ribo.GO.nightBP)
+
+htmap.ribosome_df <- dplyr::select(ribo.GO.nightBP, mean.CoD:mean.ReN, gene.annot)
+colnames(htmap.ribosome_df)
+
+# select the top 20 based on means
+mean <- as.numeric(rowMeans(htmap.ribosome_df[, 1:8]))
+head(mean)
+htmap.ribosome_mean <- cbind(htmap.ribosome_df, mean)
+head(htmap.ribosome_mean, 45)
+htmap.ribosome_top <- htmap.ribosome_mean %>% top_n(20)
+head(htmap.ribosome_top, 20) 
+htmap.ribosome_df <- dplyr::select(htmap.ribosome_top, mean.CoD:mean.ReN, gene.annot)
+
+htmap.ribosome_df <- column_to_rownames(htmap.ribosome_df, var = "gene.annot") # set rownames as gene_id
+head(htmap.ribosome_df)
+
+matrix.ribosome <- as.matrix(htmap.ribosome_df)
+summary(htmap.ribosome_df)
+
+
+# scale matrix
+cal_z_score <- function(x){
+  (x - mean(x)) / sd(x)
+}
+
+# normalize matrix
+htmap.ribosome_norm <- t(apply(htmap.ribosome_df, 1, cal_z_score))
+head(htmap.ribosome_norm)
+
+my_sample_col <- data.frame(Nutrient = rep(c("Colim", "Colim", 
+                                         "Felim", "Felim", 
+                                         "Plim", "Plim",
+                                         "Replete", "Replete")))
+
+
+my_sample_col2 <- data.frame(Diel = rep(c("Day", "Night", 
+                                          "Day", "Night",
+                                          "Day", "Night",
+                                          "Day", "Night")))
+
+
+my_sample_col_final <- cbind(my_sample_col, my_sample_col2)
+
+row.names(my_sample_col_final) <- colnames(matrix)
+
+ann_colors = list( 
+  Diel = c(Day = "#FDB813", Night = "#32174D"),
+  Nutrient = c(Colim = "#00A087FF", Felim = "#3C5488FF", Plim = "#4DBBD5FF", Replete = "#F39B7FFF"))
+
+
+h1 <- Heatmap(htmap.ribosome_norm, col = blueWhiteRed(50, 0.75), row_names_gp = gpar(fontsize = 5), row_km = 2, row_km_repeats = 100,
+              heatmap_legend_param = list(title = "Z-score", direction = "horizontal", 
+                                          title_gp = gpar(fontsize = 5, fontface = "bold"),
+                                          labels_gp = gpar(fontsize = 5), legend_width = unit(20, "mm"),
+                                          legend_height = unit(1, "mm")),
+              rect_gp = gpar(col = "black", lwd = 0.5), width = unit(2, "cm"), height = unit(8, "cm"),
+              column_split = 3, row_title_gp = gpar(fontsize = 5, fontface = "bold"), 
+              show_heatmap_legend = TRUE, column_title = "Translation (GO:0006412)",
+              column_title_gp = gpar(fontsize = 7, fontface = "bold"), show_column_names = FALSE, 
+              top_annotation = HeatmapAnnotation(df = my_sample_col_final, col = ann_colors, show_annotation_name = TRUE,
+                                                 annotation_name_gp= gpar(fontsize = 5), gp = gpar(col = "black", lwd = 0.5),
+                                                 annotation_legend_param = list(title_gp = gpar(fontsize = 5, fontface = "bold"), 
+                                                                                labels_gp = gpar(fontsize = 5),
+                                                                                grid_width = unit(2, "mm"),
+                                                                                grid_height = unit(3, "mm")),
+                                                 simple_anno_size = unit(0.3, "cm"),
+                                                 show_legend = c(TRUE, TRUE))) 
+              
+h1
+
+draw(h1, annotation_legend_side = "left", heatmap_legend_side = "bottom")
+
+pdf("htmap_enrich_GO_translation_trunc.pdf",
+    width = 8, height = 12, # Width and height in inches
+    bg = "white"          # Background color
+) 
+draw(h1, annotation_legend_side = "left", heatmap_legend_side = "bottom")
+dev.off()
+
+```
+
+```{r biomarkers, eval = TRUE, message = FALSE, warning = FALSE}
+
+df <- read.csv("boxplot_stressors_rna.csv")
+
+summary(df)
+head(df)
+
+ggplot(df, aes(Diel, counts, fill = Treatment)) + 
+  geom_boxplot() + labs(x = "", y = expression(paste("DESeq2-Normalized Counts"))) + facet_grid(geneid ~ Treatment, scales = "free") +
+  scale_fill_manual(values = c("#109c84", "#3c5484", "#4fbbd3", "#f39b7e")) + 
+  theme(axis.text.y = element_text(colour = "black", size = 7),
+        axis.text.x = element_text(colour = "black", size = 7, angle = 45, hjust = 1, vjust = 1),
+        axis.title.y = element_text(face = "bold", size = 7),
+        axis.title.x = element_blank(),
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 0.5), 
+        legend.title = element_blank(),
+        strip.text.y = element_text(size = 7, face = "bold.italic"),
+        strip.text.x = element_text(size = 7, color = "black", face = "bold"),
+        strip.background.y = element_rect(color = "black", fill = "#ededed", size = 0.5, linetype = "solid"), 
+        strip.background.x = element_rect(color = "black", fill = "white", size = 0.5, linetype = "solid"),
+        legend.position='none')
+
+ggsave("FeP_Stressor_Abundance_RNA_diel_pub.pdf", height = 8.5, width = 8.5, units = "cm", dpi=300)
+
+```
+
