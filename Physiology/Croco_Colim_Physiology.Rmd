@@ -1,0 +1,267 @@
+---
+title: "Croco_Colim_Physiology"
+author: "Nina Yang, PhD Candidate, Hutchins Lab, USC"
+date: "9/22/2021"
+updated: "3/13/2022"
+output: html_document
+---
+
+
+## Background
+
+This document uses an input file with physiological parameters and generates figures. 
+
+# 1. Install and load packages
+
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+if(!require(tidyverse)){install.packages("tidyverse")}
+if(!require(Rmisc)){install.packages("Rmisc")}
+if(!require(ggplot2)){install.packages("ggplot2")}
+if(!require(ggpubr)){install.packages("ggpubr")}
+if(!require(multcompView)){install.packages("multcompView")}
+if(!require(lsmeans)){install.packages("lsmeans")}
+```
+
+```{r install-packages, eval = TRUE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(Rmisc)
+library(ggplot2)
+library(ggpubr)
+library(multcompView)
+library(lsmeans)
+```
+
+# 1. Physiology
+
+```{r physiology, eval = TRUE, message = FALSE, warning = FALSE}
+setwd("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/pub_figures")
+
+#load data
+Codata <- readr::read_csv("Croco_Colim_PhysiologyStats.csv") # physiological parameters
+Cosize <- readr::read_csv("Croco_Colim_cellsize.csv") # cell size
+
+# check data
+summary(Codata)
+summary(Cosize)
+
+# plot growth
+grow <- summarySE(Codata, measurevar="growcell", groupvars=c("Treatment"))
+grow
+
+plot_growth <- ggplot(grow, aes(Treatment, growcell, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("Growth (",d^{-1},")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  geom_errorbar(aes(ymin=growcell, ymax = growcell+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.title = element_blank())
+
+plot_growth
+
+
+# plot cell size
+
+plot_cellsize <- ggplot(Cosize, aes(x=Treatment, y=cellsize, fill = Treatment)) + 
+  geom_violin(trim = FALSE, width = 0.6) + labs(x = "", y = expression(paste("Cell diameter (", mu, "m)"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) + 
+  scale_y_continuous(breaks=c(3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5)) + 
+  geom_boxplot(width = 0.2, fill = "white") +
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none",
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1),
+        legend.title = element_blank()) + 
+  stat_summary(fun=mean, geom="point", shape=23, size=1, color = "black")
+
+plot_cellsize
+
+# plot cellCfix and cellNfix
+cellCfix <- summarySE(Codata, measurevar="cellCfix", groupvars=c("Treatment"))
+cellCfix
+cellNfix <- summarySE(Codata, measurevar="cellNfix", groupvars=c("Treatment"), na.rm = TRUE)
+cellNfix
+
+plot_cellCfix <- ggplot(cellCfix, aes(Treatment, cellCfix, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("C-fixation (", mu, "mol C ", cell^{-1}, " ", h^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, .2)) +
+  geom_errorbar(aes(ymin=cellCfix, ymax = cellCfix+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+        #        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.title = element_blank(),
+        legend.text = element_blank())
+
+plot_cellCfix
+
+
+plot_cellNfix <- ggplot(cellNfix, aes(Treatment, cellNfix, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("N-fixation (pmol N ", cell^{-1}, " ", h^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, .007)) +
+  geom_errorbar(aes(ymin=cellNfix, ymax = cellNfix+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+        #        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.title = element_blank(),
+        legend.text = element_blank())
+
+plot_cellNfix
+
+
+all <- ggarrange(plot_growth, plot_cellsize, plot_cellCfix, plot_cellNfix, nrow = 2, ncol = 2, common.legend = FALSE)
+
+
+all
+
+ggsave("Colim_growth_cellsize_panel_pub.pdf", height = 6, width = 17, units = "cm", dpi=300)
+
+
+# Resource Use Efficiences
+
+CPUE <- summarySE(Codata, measurevar="CPUE", groupvars=c("Treatment"))
+CPUE
+
+CIUE <- summarySE(Codata, measurevar="CIUE", groupvars=c("Treatment"), na.rm = TRUE)
+CIUE
+
+NPUE <- summarySE(Codata, measurevar="NPUE", groupvars=c("Treatment"), na.rm = TRUE)
+NPUE
+
+NIUE <- summarySE(Codata, measurevar="NIUE", groupvars=c("Treatment"), na.rm = TRUE)
+NIUE
+
+
+plot_CPUE <- ggplot(CPUE, aes(Treatment, CPUE, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("C-PUE (mol C fixed ", h^{-1}, " mol ", P^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, 35)) +
+  geom_errorbar(aes(ymin=CPUE, ymax = CPUE+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+#        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.title = element_blank(),
+        legend.text = element_blank())
+
+
+plot_CPUE
+
+plot_NPUE <- ggplot(NPUE, aes(Treatment, NPUE, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("N-PUE (mol N fixed ", h^{-1}, " mol ", P^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, 0.9)) +
+  geom_errorbar(aes(ymin=NPUE, ymax = NPUE+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+        axis.text.x = element_text(colour = "black", size = 6),
+#        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.text = element_blank())
+
+
+plot_NPUE
+
+
+plot_CIUE <- ggplot(CIUE, aes(Treatment, CIUE, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("C-IUE (mol C fixed ", h^{-1}, " mol ", Fe^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, 4200)) +
+  geom_errorbar(aes(ymin=CIUE, ymax = CIUE+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+#        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = NA, size = 1), 
+        legend.text = element_blank())
+
+
+plot_CIUE
+
+plot_NIUE <- ggplot(NIUE, aes(Treatment, NIUE, fill = Treatment)) +
+  geom_bar(stat = "identity", color = "black", position=position_dodge(), width = .6) + labs(x = "", y = expression(paste("N-IUE (mol N fixed ", h^{-1}, " mol ", Fe^{-1}, ")"))) +
+  scale_fill_manual(values = c("#0a9f87", "#3e5489", "#4ebad6", "#ed9d81")) +
+  scale_y_continuous(limits=c(0, 140)) +
+  geom_errorbar(aes(ymin=NIUE, ymax = NIUE+sd), width = .2, position = position_dodge(.9)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 6),
+#        axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.x = element_text(colour = "black", size = 6),
+        axis.title.y = element_text(face = "bold", size = 7), legend.position = "none", 
+        panel.background = element_blank(), panel.border = element_rect(colour = "black", fill = "NA", size = 1), 
+        legend.text = element_blank())
+
+plot_NIUE
+
+
+
+all <- ggarrange(plot_CPUE, plot_NPUE, plot_CIUE, plot_NIUE, nrow = 2, ncol = 2, common.legend = FALSE)
+
+
+all
+
+
+getwd()
+
+ggsave("Colim_RUEs_pub.pdf", height = 12, width = 12, units = "cm", dpi=300)
+
+```
+
+# 2. Statistics
+
+```{r stats, eval = TRUE, message = FALSE, warning = FALSE}
+
+#check my_data
+summary(Codata)
+summary(Cosize)
+
+#compute summary statistics for data
+
+group_by(Codata, Treatment) %>% #(pipe operator)
+  dplyr::summarise(
+    count = n(),
+    mean = mean(growcell, na.rm = TRUE),
+    sd = sd(growcell, na.rm = TRUE)
+  )
+
+group_by(Cosize, Treatment) %>% #(pipe operator)
+  dplyr::summarise(
+    count = n(),
+    mean = mean(cellsize, na.rm = TRUE),
+    sd = sd(cellsize, na.rm = TRUE)
+  )
+
+res.aov <- aov(growcell ~ Treatment, data = Codata)
+
+summary(res.aov)
+
+TukeyHSD(res.aov, ordered = TRUE)
+
+lsmeans = lsmeans::lsmeans ### Uses the lsmeans function
+cld=multcomp::cld
+###  from the lsmeans package,
+###  not from the lmerTest package
+leastsquare = lsmeans(res.aov, ~ Treatment, adjust = "none")
+cld(leastsquare, alpha=0.05, Letters=letters)
+
+
+res.aov <- aov(cellsize ~ Treatment, data = Cosize)
+summary(res.aov)
+
+TukeyHSD(res.aov, ordered = TRUE)
+
+lsmeans = lsmeans::lsmeans ### Uses the lsmeans function
+cld=multcomp::cld
+###  from the lsmeans package,
+###  not from the lmerTest package
+leastsquare = lsmeans(res.aov, ~ Treatment, adjust = "none")
+cld(leastsquare, alpha=0.05, Letters=letters)
+
+
+```
