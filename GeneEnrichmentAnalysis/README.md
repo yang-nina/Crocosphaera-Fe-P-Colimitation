@@ -1,4 +1,4 @@
-This folder includes code and relevant files for gene enrichment analysis and heatmap, dot plot, and box plot visualizations.
+This folder includes code and relevant files for gene enrichment analysis and heatmap, dot plot, and box plot visualizations. All visualizations were formatted with minor edits for clarity and indicators of statistical significance, and compiled for composite figures using Affinity Designer for macOS (https://affinity.serif.com/en-us/).
 
 ## Folders and Files
 
