@@ -13,3 +13,5 @@ Code, input files, and relevant output files for data analysis and visualization
 1. Croco_Annotation --> This folder includes code and files necessary to annotate the genome for gene ontology annotation
 2. DESeq2 --> This folder includes code and files necessary for DESeq2 pairwise analyses. This also includes sample output files for reference.
 3. VennDiagrams --> This folder includes code and files necessary for the Venn Diagram analysis. 
+4. GeneEnrichmentAnalysis --> This folder includes the files (code and inputs) necessary to run the gene enrichment (clusterProfiler) to generate the manuscript heatmap visualizations and biomarker boxplots.
+5. Physiology --> This folder includes the files and code necessary to recreate the physioogical plots.
