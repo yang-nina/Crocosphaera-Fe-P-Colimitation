@@ -10,5 +10,5 @@ This folder includes code and relevant files for generating the visualizations f
       - Output files: Physiology figures
 
     B. Statistical analyses
-      - Input files: 
-      - Output file: 
+      - Input files: Same as Figures
+      - Outputs: Statistical outputs including _p_-values and letters indicating statistical significance used in the figures. 
