@@ -34,7 +34,6 @@ library(lsmeans)
 # 1. Physiology
 
 ```{r physiology, eval = TRUE, message = FALSE, warning = FALSE}
-setwd("/Users/ninayang/Documents/Hutchins_Lab/Exp_Croco_Colimit/pub_figures")
 
 #load data
 Codata <- readr::read_csv("Croco_Colim_PhysiologyStats.csv") # physiological parameters
