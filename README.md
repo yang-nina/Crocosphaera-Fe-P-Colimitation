@@ -1,6 +1,6 @@
 # Crocosphaera Fe/P (Co)-limitation
 
-This respository includes the data and code to recreate analyses and figures from "	Diel molecular mechanisms underlying iron and phosphorus co-limitation responses in the nitrogen-fixing cyanobacterium Crocosphaera".
+This respository includes the data and code to recreate analyses and figures from "Diel molecular mechanisms underlying iron and phosphorus co-limitation responses in the nitrogen-fixing cyanobacterium Crocosphaera".
 
 ## Abstract
 
